@@ -15,7 +15,7 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # ==============================
 @app.route('/')
 def home():
-    return render_template('interfaz.html')
+    return render_template('index.html')
 
 # ==============================
 # PREDICCIÓN DESDE EL FORMULARIO
