@@ -2,8 +2,10 @@ import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import LogisticRegression
+from imblearn.over_sampling import SMOTE
 import joblib
 import numpy as np
 import base64
@@ -19,36 +21,83 @@ DATASET_PATH = r"C:\Proyecto final\Dataset para PROYECTO FINAL\DEMALE-HSJM_2025_
 MODEL_PATH = "modelo_entrenado.pkl"
 
 # Variables globales para el modelo
-model = None
+model_logistica = None
+model_mlp = None
 scaler = None
 label_map = None
-# Columnas base de síntomas y columnas opcionales de laboratorio para mejorar precisión
-base_cols = ['fever', 'rash', 'abdominal_pain', 'dizziness', 'chills']
-optional_cols = ['hemoglobin', 'red_blood_cells', 'white_blood_cells']
-# expected_cols se determinará dinámicamente al entrenar/cargar el modelo
-expected_cols = base_cols + optional_cols
+# Lista completa de TODAS las variables predictoras posibles
+expected_cols = [
+    'male', 'female', 'age', 'urban_origin', 'rural_origin',
+    'homemaker', 'student', 'professional', 'merchant', 'agriculture_livestock',
+    'various_jobs', 'unemployed', 'hospitalization_days', 'body_temperature',
+    'fever', 'headache', 'dizziness', 'loss_of_appetite', 'weakness',
+    'myalgias', 'arthralgias', 'eye_pain', 'hemorrhages', 'vomiting',
+    'abdominal_pain', 'chills', 'hemoptysis', 'edema', 'jaundice',
+    'bruises', 'petechiae', 'rash', 'diarrhea', 'respiratory_difficulty',
+    'itching', 'hematocrit', 'hemoglobin', 'red_blood_cells',
+    'white_blood_cells', 'neutrophils', 'eosinophils', 'basophils',
+    'monocytes', 'lymphocytes', 'platelets', 'ast', 'alt',
+    'alp', 'total_bilirubin', 'direct_bilirubin',
+    'indirect_bilirubin', 'total_proteins', 'albumin', 'creatinine', 'urea'
+]
 
+# Renombrar columnas para que coincidan con el dataset
+column_rename_map = {
+    'sgot': 'ast',
+    'sgpt': 'alt',
+    'alkaline_phosphatase': 'alp'
+}
+
+# ===============================
+# VALIDACIÓN DE DATOS
+# ===============================
+def validar_sintomas(sintomas):
+    """Valida que los datos de entrada estén en rangos realistas."""
+    errores = []
+    age = sintomas.get('age')
+    if age is not None and not (0 < float(age) < 120):
+        errores.append("La edad debe ser un valor realista (entre 1 y 119).")
+    
+    temp = sintomas.get('body_temperature')
+    if temp is not None and not (34 < float(temp) < 45):
+        errores.append("La temperatura corporal debe estar entre 34°C y 45°C.")
+
+    hemoglobin = sintomas.get('hemoglobin')
+    if hemoglobin is not None and not (5 < float(hemoglobin) < 25):
+        errores.append("El valor de hemoglobina es irreal (debe estar entre 5 y 25 g/dL).")
+
+    if errores:
+        raise ValueError("Datos no válidos: " + " ".join(errores))
 # ===============================
 # CARGAR O ENTRENAR MODELO
 # ===============================
 def cargar_modelo():
     """Carga el modelo entrenado si existe, si no, lo entrena"""
-    global model, scaler, label_map
+    global model_logistica, model_mlp, scaler, label_map, expected_cols
     
     if os.path.exists(MODEL_PATH):
         print(f"📂 Cargando modelo existente desde: {MODEL_PATH}")
         modelo_data = joblib.load(MODEL_PATH)
-        model = modelo_data["model"]
-        scaler = modelo_data["scaler"]
-        label_map = modelo_data["label_map"]
-        print("✅ Modelo cargado correctamente.")
+        
+        # Comprobar si el modelo cargado es compatible (tiene los dos modelos)
+        if "model_logistica" in modelo_data and "model_mlp" in modelo_data:
+            model_logistica = modelo_data["model_logistica"]
+            model_mlp = modelo_data["model_mlp"]
+            scaler = modelo_data["scaler"]
+            expected_cols = modelo_data["columns"]
+            label_map = modelo_data["label_map"]
+            print("✅ Modelo cargado correctamente.")
+        else:
+            # Si es un modelo antiguo, forzar re-entrenamiento
+            print("⚠️ Modelo antiguo detectado. Forzando re-entrenamiento para actualizarlo...")
+            entrenar_modelo()
     else:
         print("⚠️ No existe modelo entrenado. Entrenando nuevo modelo...")
         entrenar_modelo()
         
 def entrenar_modelo():
     """Entrena el modelo desde cero"""
-    global model, scaler, label_map
+    global model_logistica, model_mlp, scaler, label_map, expected_cols
     
     print(f"📂 Cargando dataset desde: {DATASET_PATH}")
     
@@ -63,33 +112,28 @@ def entrenar_modelo():
     print(f"🔢 Filas: {data.shape[0]}, Columnas: {data.shape[1]}")
     
     # Normalizar nombres de columnas
-    data.columns = [c.strip().lower().replace(" ", "_") for c in data.columns]
+    data.columns = [c.strip().lower().replace(" ", "_").replace("(sgot)", "").replace("(sgpt)", "") for c in data.columns]
+    data.rename(columns=column_rename_map, inplace=True)
     
     # Verificar columna objetivo
-    target_col = 'disease'
-    if target_col not in data.columns:
+    target_col_name = 'diagnosis' # Cambiado a 'diagnosis'
+    if target_col_name not in data.columns:
         print("⚠️ No se encontró la columna 'disease'. Buscando columnas similares...")
         posibles = [c for c in data.columns if 'enfer' in c or 'diag' in c or 'clas' in c or 'tipo' in c]
         if posibles:
-            target_col = posibles[0]
-            print(f"🧠 Usando columna '{target_col}' como variable objetivo.")
+            target_col_name = posibles[0]
+            print(f"🧠 Usando columna '{target_col_name}' como variable objetivo.")
         else:
             raise ValueError("❌ No se encontró ninguna columna que indique la enfermedad (disease).")
     
     # Detectar qué columnas de entrada usaremos (aceptando opcionales si existen)
-    cols_presentes = [c for c in base_cols + optional_cols if c in data.columns]
-    # Asegurar que las columnas base estén presentes
-    faltan_base = [c for c in base_cols if c not in cols_presentes]
-    if faltan_base:
-        raise ValueError(f"❌ Faltan columnas base requeridas en el dataset: {faltan_base}")
-
-    # Establecer expected_cols global según dataset disponible
-    global expected_cols
-    expected_cols = cols_presentes
+    cols_a_usar = [col for col in globals()['expected_cols'] if col in data.columns]
+    if not cols_a_usar:
+        raise ValueError("❌ Ninguna de las columnas esperadas se encontró en el dataset.")
 
     # Separar variables y etiquetas
-    X = data[expected_cols]
-    y = data[target_col]
+    X = data[cols_a_usar]
+    y = data[target_col_name]
     
     # Mapear valores
     label_map = {
@@ -101,77 +145,89 @@ def entrenar_modelo():
     y = y.map(lambda v: label_map.get(v, v))
     
     print("🧬 Distribución de clases:")
+
+    print("🧬 Distribución de clases (antes de SMOTE):")
     print(y.value_counts())
     
     # Entrenar modelo
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
+    # Aplicar SMOTE para balancear las clases SOLO en el conjunto de entrenamiento
+    print("⚖️ Aplicando SMOTE para balancear los datos de entrenamiento...")
+    smote = SMOTE(random_state=42)
+    X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+    print("🧬 Distribución de clases (después de SMOTE):")
+    print(pd.Series(y_train_resampled).value_counts())
+
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
+    X_train_scaled = scaler.fit_transform(X_train_resampled)
     X_test_scaled = scaler.transform(X_test)
     
-    model = RandomForestClassifier(n_estimators=200, random_state=42)
-    model.fit(X_train_scaled, y_train)
-    
-    accuracy = model.score(X_test_scaled, y_test)
-    print(f"✅ Modelo entrenado correctamente con una precisión del {accuracy*100:.2f}%")
+    # Entrenar Regresión Logística
+    model_logistica = LogisticRegression(random_state=42, max_iter=1000)
+    model_logistica.fit(X_train_scaled, y_train)
+    model_logistica.fit(X_train_scaled, y_train_resampled)
+    accuracy_logistica = model_logistica.score(X_test_scaled, y_test)
+    print(f"✅ Modelo de Regresión Logística entrenado con una precisión del {accuracy_logistica*100:.2f}%")
+
+    # Entrenar Red Neuronal (MLP)
+    model_mlp = MLPClassifier(random_state=42, max_iter=1000, hidden_layer_sizes=(100, 50), alpha=0.0001, solver='adam', learning_rate='adaptive')
+    model_mlp.fit(X_train_scaled, y_train)
+    model_mlp.fit(X_train_scaled, y_train_resampled)
+    accuracy_mlp = model_mlp.score(X_test_scaled, y_test)
+    print(f"✅ Modelo de Red Neuronal (MLP) entrenado con una precisión del {accuracy_mlp*100:.2f}%")
     
     # Guardar modelo
-    joblib.dump({"model": model, "scaler": scaler, "label_map": label_map}, MODEL_PATH)
+    expected_cols = cols_a_usar # Actualizar la variable global con las columnas usadas
+    joblib.dump({
+        "model_logistica": model_logistica, "model_mlp": model_mlp, 
+        "scaler": scaler, "label_map": label_map, "columns": expected_cols
+    }, MODEL_PATH)
     print(f"💾 Modelo guardado en: {os.path.abspath(MODEL_PATH)}")
 
 # ===============================
 # FUNCIÓN DE PREDICCIÓN
 # ===============================
-def predecir_enfermedad(sintomas):
+def predecir_enfermedad(sintomas, tipo_modelo='logistica'):
     """
-    Realiza la predicción de enfermedad.
-    Acepta 5 síntomas binarios base y opcionalmente variables de laboratorio:
-    - Base: fever, rash, abdominal_pain, dizziness, chills (0/1)
-    - Opcionales: hemoglobin, red_blood_cells, white_blood_cells (numéricas)
+    Realiza la predicción de enfermedad usando el conjunto completo de variables.
     """
-    if model is None or scaler is None:
+    if model_logistica is None or model_mlp is None or scaler is None:
         cargar_modelo()
 
-    # Construir entrada alineada a expected_cols actual
-    fila = []
-    if isinstance(sintomas, dict):
-        for col in expected_cols:
-            if col in ['fever', 'rash', 'abdominal_pain', 'dizziness', 'chills']:
-                valor = int(sintomas.get(col, 0))
-            else:
-                v = sintomas.get(col, None)
-                # Permitir None para opcionales: imputar con 0 si no viene
-                if v is None or v == "":
-                    valor = 0.0
-                else:
-                    valor = float(v)
-            fila.append(valor)
-    else:
-        # Compatibilidad: si viene como tupla/lista en orden base, y opcionales faltan
-        base_vals = list(sintomas[:5])
-        base_vals = [int(x) for x in base_vals]
-        opc_map = {k: 0.0 for k in optional_cols}
-        # Si trae más valores, mapear en orden opcional
-        if len(sintomas) > 5:
-            extra = sintomas[5:]
-            for i, k in enumerate(optional_cols[:len(extra)]):
-                opc_map[k] = float(extra[i])
-        valores = {**dict(zip(base_cols, base_vals)), **opc_map}
-        for col in expected_cols:
-            fila.append(valores.get(col, 0.0))
+    # Validar datos de entrada
+    validar_sintomas(sintomas)
 
+    # Construir la fila de datos para la predicción
+    fila = {}
+    for col in expected_cols:
+        valor = sintomas.get(col)
+        if valor is None or valor == '':
+            fila[col] = 0.0  # Imputar con 0 si no se proporciona
+        else:
+            fila[col] = float(valor)
+
+    # Crear DataFrame y predecir
     entrada = pd.DataFrame([fila], columns=expected_cols)
     entrada_scaled = scaler.transform(entrada)
-    pred = model.predict(entrada_scaled)[0]
+
+    # Seleccionar el modelo según la elección del usuario
+    if tipo_modelo == 'red_neuronal':
+        print("🧠 Usando modelo de predicción: Red Neuronal (MLP)")
+        pred = model_mlp.predict(entrada_scaled)[0]
+    else:
+        print("🧠 Usando modelo de predicción: Regresión Logística")
+        pred = model_logistica.predict(entrada_scaled)[0]
+        
     return pred
 
 # ===============================
 # FUNCIONES DE EVALUACIÓN
 # ===============================
 def evaluar_modelo():
-    """Evalúa el modelo y genera métricas con gráficos"""
-    if model is None or scaler is None:
+    """Evalúa ambos modelos y genera métricas con gráficos"""
+    if model_logistica is None or model_mlp is None or scaler is None:
         cargar_modelo()
     
     print(f"📂 Cargando dataset para evaluación desde: {DATASET_PATH}")
@@ -182,44 +238,63 @@ def evaluar_modelo():
         raise RuntimeError(f"Error al leer el dataset: {e}")
     
     # Normalizar nombres de columnas
-    data.columns = [c.strip().lower().replace(" ", "_") for c in data.columns]
+    data.columns = [c.strip().lower().replace(" ", "_").replace("(sgot)", "").replace("(sgpt)", "") for c in data.columns]
+    data.rename(columns=column_rename_map, inplace=True)
     
     # Obtener datos
-    target_col = 'disease'
-    if target_col not in data.columns:
+    target_col_name = 'diagnosis'
+    if target_col_name not in data.columns:
         posibles = [c for c in data.columns if 'enfer' in c or 'diag' in c or 'clas' in c or 'tipo' in c]
         if posibles:
-            target_col = posibles[0]
+            target_col_name = posibles[0]
     
-    X = data[expected_cols]
-    y_true = data[target_col].map(lambda v: label_map.get(v, v))
+    # Reindexar para asegurar que las columnas coincidan con las del modelo
+    X = data.reindex(columns=expected_cols, fill_value=0.0)
+    y_true = data[target_col_name].map(lambda v: label_map.get(v, v))
     
     # Predecir con el modelo
     X_scaled = scaler.transform(X)
-    y_pred = model.predict(X_scaled)
+    y_pred_logistica = model_logistica.predict(X_scaled)
+    y_pred_mlp = model_mlp.predict(X_scaled)
     
-    # Calcular métricas
-    accuracy = accuracy_score(y_true, y_pred)
+    # Calcular métricas para Regresión Logística
+    accuracy_logistica = accuracy_score(y_true, y_pred_logistica)
     
-    # Generar gráficos
-    fig_confusion = generar_matriz_confusion(y_true, y_pred)
-    fig_dispersion = generar_grafica_dispersion(X_scaled, y_true, y_pred)
+    # Generar gráficos para Regresión Logística
+    fig_confusion_logistica = generar_matriz_confusion(y_true, y_pred_logistica, "Regresión Logística")
+    fig_dispersion_logistica = generar_grafica_dispersion(X_scaled, y_true, y_pred_logistica, "Regresión Logística")
     
     # Convertir gráficos a base64
-    confusion_b64 = figura_a_base64(fig_confusion)
-    dispersion_b64 = figura_a_base64(fig_dispersion)
+    confusion_b64_logistica = figura_a_base64(fig_confusion_logistica)
+    dispersion_b64_logistica = figura_a_base64(fig_dispersion_logistica)
+
+    # Calcular métricas para Red Neuronal
+    accuracy_mlp = accuracy_score(y_true, y_pred_mlp)
+    
+    # Generar gráficos para Red Neuronal
+    fig_confusion_mlp = generar_matriz_confusion(y_true, y_pred_mlp, "Red Neuronal (MLP)")
+    fig_dispersion_mlp = generar_grafica_dispersion(X_scaled, y_true, y_pred_mlp, "Red Neuronal (MLP)")
+    
+    # Convertir gráficos a base64
+    confusion_b64_mlp = figura_a_base64(fig_confusion_mlp)
+    dispersion_b64_mlp = figura_a_base64(fig_dispersion_mlp)
     
     plt.close('all')  # Cerrar todas las figuras
     
     return {
-        'precision': accuracy,
-        'matriz_confusion': confusion_matrix(y_true, y_pred).tolist(),
-        'reporte': classification_report(y_true, y_pred, output_dict=True),
-        'grafica_confusion': confusion_b64,
-        'grafica_dispersion': dispersion_b64
+        'logistica': {
+            'precision': accuracy_logistica,
+            'grafica_confusion': confusion_b64_logistica,
+            'grafica_dispersion': dispersion_b64_logistica
+        },
+        'red_neuronal': {
+            'precision': accuracy_mlp,
+            'grafica_confusion': confusion_b64_mlp,
+            'grafica_dispersion': dispersion_b64_mlp
+        }
     }
 
-def generar_matriz_confusion(y_true, y_pred):
+def generar_matriz_confusion(y_true, y_pred, model_name=""):
     """Genera gráfica de matriz de confusión"""
     fig, ax = plt.subplots(figsize=(8, 6))
     cm = confusion_matrix(y_true, y_pred)
@@ -232,7 +307,7 @@ def generar_matriz_confusion(y_true, y_pred):
     ax.set(xticks=np.arange(cm.shape[1]),
            yticks=np.arange(cm.shape[0]),
            xticklabels=clases, yticklabels=clases,
-           title='Matriz de Confusión',
+           title=f'Matriz de Confusión ({model_name})',
            ylabel='Etiqueta Real',
            xlabel='Etiqueta Predicha')
     
@@ -247,7 +322,7 @@ def generar_matriz_confusion(y_true, y_pred):
     plt.tight_layout()
     return fig
 
-def generar_grafica_dispersion(X_scaled, y_true, y_pred):
+def generar_grafica_dispersion(X_scaled, y_true, y_pred, model_name=""):
     """Genera gráfica de dispersión usando PCA para reducir dimensiones"""
     from sklearn.decomposition import PCA
     
@@ -271,7 +346,7 @@ def generar_grafica_dispersion(X_scaled, y_true, y_pred):
             ax1.scatter(X_2d[mask, 0], X_2d[mask, 1], c=colores.get(enfermedad, 'gray'),
                        label=enfermedad, alpha=0.6, s=50)
         ax1.set_title('Distribución Real de Enfermedades')
-        ax1.set_xlabel(f'Componente Principal 1 ({pca.explained_variance_ratio_[0]*100:.1f}%)')
+        ax1.set_xlabel(f'CP 1 ({pca.explained_variance_ratio_[0]*100:.1f}%)')
         ax1.set_ylabel(f'Componente Principal 2 ({pca.explained_variance_ratio_[1]*100:.1f}%)')
         ax1.legend()
         ax1.grid(True, alpha=0.3)
@@ -281,9 +356,9 @@ def generar_grafica_dispersion(X_scaled, y_true, y_pred):
         mask = y_pred == enfermedad
         ax2.scatter(X_2d[mask, 0], X_2d[mask, 1], c=colores.get(enfermedad, 'gray'),
                    label=enfermedad, alpha=0.6, s=50)
-    ax2.set_title('Predicciones del Modelo')
-    ax2.set_xlabel(f'Componente Principal 1 ({pca.explained_variance_ratio_[0]*100:.1f}%)')
-    ax2.set_ylabel(f'Componente Principal 2 ({pca.explained_variance_ratio_[1]*100:.1f}%)')
+    ax2.set_title(f'Predicciones ({model_name})')
+    ax2.set_xlabel(f'CP 1 ({pca.explained_variance_ratio_[0]*100:.1f}%)')
+    ax2.set_ylabel(f'CP 2 ({pca.explained_variance_ratio_[1]*100:.1f}%)')
     ax2.legend()
     ax2.grid(True, alpha=0.3)
     
@@ -307,38 +382,34 @@ def predecir_lote(archivo_excel):
     Predice enfermedades para un archivo Excel cargado.
     Retorna predicciones, gráficas y métricas.
     """
-    if model is None or scaler is None:
+    if model_logistica is None or scaler is None:
         cargar_modelo()
     
     try:
-        # Leer el archivo Excel
-        data = pd.read_excel(archivo_excel)
+        # Leer el archivo Excel o CSV
+        if archivo_excel.endswith('.csv'):
+            data = pd.read_csv(archivo_excel)
+        else:
+            data = pd.read_excel(archivo_excel)
+
     except Exception as e:
         raise RuntimeError(f"Error al leer el archivo Excel: {e}")
     
     # Normalizar nombres de columnas
-    data.columns = [c.strip().lower().replace(" ", "_") for c in data.columns]
-    
-    # Detectar columnas disponibles en el archivo (base + opcionales)
-    cols_presentes = [c for c in base_cols + optional_cols if c in data.columns]
-    faltan_base = [c for c in base_cols if c not in cols_presentes]
-    if faltan_base:
-        raise ValueError(f"Faltan columnas base requeridas en el archivo: {faltan_base}")
+    data.columns = [c.strip().lower().replace(" ", "_").replace("(sgot)", "").replace("(sgpt)", "") for c in data.columns]
+    data.rename(columns=column_rename_map, inplace=True)
 
-    # Alinear columnas usadas a las del modelo si es posible; si el modelo espera
-    # más columnas que el archivo, imputar faltantes con 0.
-    cols_para_usar = expected_cols if all(c in data.columns for c in expected_cols) else cols_presentes
-
+    # Validar que al menos algunas columnas esperadas estén presentes
+    if not any(col in data.columns for col in expected_cols):
+        raise ValueError("El archivo no contiene ninguna de las columnas predictoras esperadas.")
     # Preparar datos alineados al modelo
     X = data.reindex(columns=expected_cols, fill_value=0.0)
     
     # Predecir
+    # Para lotes, usamos el modelo más rápido (Regresión Logística) por defecto.
     X_scaled = scaler.transform(X)
-    y_pred = model.predict(X_scaled)
-    
-    # Obtener probabilidades
-    y_proba = model.predict_proba(X_scaled)
-    
+    y_pred = model_logistica.predict(X_scaled)
+    y_proba = model_logistica.predict_proba(X_scaled)
     # Agregar predicciones al DataFrame
     data['prediccion'] = y_pred
     for idx, enfermedad in enumerate(label_map.values()):
@@ -352,23 +423,32 @@ def predecir_lote(archivo_excel):
     
     # Generar gráficas
     fig_confusion = None
-    fig_dispersion = generar_grafica_dispersion(X_scaled, None, y_pred)
+    fig_dispersion = generar_grafica_dispersion(X_scaled, None, y_pred, "Regresión Logística")
     
     # Si hay columna 'disease' o similar, calcular matriz de confusión
     target_col = None
     for col in data.columns:
-        if 'disease' in col or 'enfer' in col or 'diag' in col:
+        if 'diagnosis' in col or 'disease' in col or 'enfer' in col:
             target_col = col
             break
     
     if target_col:
-        try:
-            # Intentar mapear los valores reales
-            y_true = data[target_col].map(lambda v: label_map.get(v, v))
-            fig_confusion = generar_matriz_confusion(y_true, y_pred)
+        # Asegurarse de que la columna de verdad fundamental (ground truth) exista y no esté vacía
+        if target_col in data and not data[target_col].isnull().all():
+            # Mapear los valores reales y eliminar filas donde el mapeo falló (NaN)
+            y_true_mapped = data[target_col].map(lambda v: label_map.get(v, v))
+            
+            # Crear un DataFrame temporal para alinear predicciones y valores reales
+            # Esto es crucial si hay valores NaN en y_true_mapped que deben ser ignorados
+            temp_df = pd.DataFrame({'true': y_true_mapped, 'pred': y_pred}).dropna()
+            
+            y_true = temp_df['true']
+            y_pred_aligned = temp_df['pred']
+            
+            fig_confusion = generar_matriz_confusion(y_true, y_pred, "Regresión Logística")
             confusion_b64 = figura_a_base64(fig_confusion)
-            estadisticas['precision'] = accuracy_score(y_true, y_pred)
-        except:
+            estadisticas['precision'] = accuracy_score(y_true, y_pred_aligned)
+        else:
             confusion_b64 = None
             estadisticas['precision'] = None
     else:
@@ -400,9 +480,13 @@ cargar_modelo()
 # ===============================
 if __name__ == "__main__":
     print("\n🧠 Test de ejemplo:")
-    ejemplo = predecir_enfermedad({'fever': 1, 'rash': 0, 'abdominal_pain': 1, 'dizziness': 0, 'chills': 1})
-    print(f"Predicción para fiebre=1, rash=0, dolor_abd=1, mareos=0, escalofríos=1 → {ejemplo}")
+    sintomas_ejemplo = {'age': 35, 'body_temperature': 39.5, 'fever': 1, 'rash': 0, 'abdominal_pain': 1, 'dizziness': 0, 'chills': 1}
+    pred_logistica = predecir_enfermedad(sintomas_ejemplo, tipo_modelo='logistica')
+    print(f"Predicción con Regresión Logística → {pred_logistica}")
+    pred_mlp = predecir_enfermedad(sintomas_ejemplo, tipo_modelo='red_neuronal')
+    print(f"Predicción con Red Neuronal → {pred_mlp}")
     
     print("\n📊 Evaluando modelo...")
     resultados = evaluar_modelo()
-    print(f"Precisión: {resultados['precision']*100:.2f}%")
+    print(f"Precisión (Logística): {resultados['logistica']['precision']*100:.2f}%")
+    print(f"Precisión (Red Neuronal): {resultados['red_neuronal']['precision']*100:.2f}%")

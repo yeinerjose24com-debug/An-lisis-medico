@@ -227,6 +227,59 @@
       .resultados{ order:3; }
     }
 
+    /* Optimización para teléfonos ~6.7" (aprox. ≤ 430px de ancho) */
+    @media (max-width: 430px){
+      body{ padding:14px; }
+      .contenedor{ gap:12px; }
+
+      .header{ padding:14px; }
+      .brand .logo{ width:44px; height:44px; border-radius:10px; font-size:16px; }
+      .brand h1{ font-size:16px; }
+      .brand p{ font-size:12px; }
+
+      .panel{ padding:14px; border-radius:10px; }
+      .panel h3{ font-size:15px; }
+      .panel p.desc{ font-size:12px; }
+
+      .campo{ padding:10px; gap:8px; }
+      .campo label{ font-size:13px; }
+      .campo select, .campo input[type="number"]{ width: 100%; max-width: none; font-size:14px; }
+
+      .actions{ flex-wrap: wrap; }
+      .btn{ width:100%; padding:12px; font-size:14px; }
+
+      .hero{ padding:12px; }
+      .hero .cover{ height: 200px; }
+      .mini-card{ padding:10px; }
+      .mini-card img{ width:96px; height:96px; }
+      .mini-card .meta h4{ font-size:13px; }
+      .mini-card .meta p{ font-size:12px; }
+
+      .resultado-box{ height:auto; max-height: 70vh; }
+
+      /* Grillas a una sola columna */
+      .cards{ grid-template-columns: 1fr; }
+
+      /* Tipografías generales un poco más compactas */
+      .badge{ font-size:12px; }
+
+      /* Prevenir overflow horizontal */
+      img{ max-width:100%; height:auto; }
+      .panel, .header, .hero, .resultados{ overflow:hidden; }
+    }
+
+    /* Ajustes para 360–390px */
+    @media (max-width: 390px){
+      .brand h1{ font-size:15px; }
+      .header-actions button{ padding:6px 8px; font-size:12px; }
+    }
+
+    /* Ajustes para muy estrechos ≤ 360px */
+    @media (max-width: 360px){
+      .brand h1{ font-size:14px; }
+      .brand p{ display:none; }
+    }
+
     /* Modal para ampliar gráficas */
     .modal {
       display: none;
@@ -323,71 +376,226 @@
         </div>
       </div>
       
-      <h3>Formulario rápido — 5 síntomas</h3>
-      <p class="desc">Marca si el paciente presenta cada síntoma. Luego presiona <b>Predecir</b> para obtener una estimación local instantánea.</p>
+      <h3>Datos del Paciente</h3>
+      <p class="desc">Completa los campos para obtener una predicción del modelo de IA.</p>
 
-      <!-- SÍNTOMAS -->
+      <!-- DATOS DEMOGRÁFICOS -->
+      <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Datos Demográficos</h3>
       <div class="campo">
-        <label for="fiebre">¿Tiene fiebre?</label>
-        <select id="fiebre">
+        <label for="age">Edad</label>
+        <input type="number" id="age" placeholder="ej. 35" />
+      </div>
+      <div class="campo">
+        <label for="male">Sexo</label>
+        <select id="male">
+          <option value="0">Femenino</option>
+          <option value="1">Masculino</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="urban_origin">Origen</label>
+        <select id="urban_origin">
+          <option value="1">Urbano</option>
+          <option value="0">Rural</option>
+        </select>
+      </div>
+
+      <!-- OCUPACIÓN -->
+      <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Ocupación</h3>
+      <div class="campo">
+        <label for="occupation">Ocupación Principal</label>
+        <select id="occupation">
+          <option value="unemployed">Desempleado/Otro</option>
+          <option value="homemaker">Ama de casa</option>
+          <option value="student">Estudiante</option>
+          <option value="professional">Profesional</option>
+          <option value="merchant">Comerciante</option>
+          <option value="agriculture_livestock">Agricultura/Ganadería</option>
+          <option value="various_jobs">Trabajos varios</option>
+        </select>
+      </div>
+
+      <!-- SÍNTOMAS CLÍNICOS -->
+      <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Síntomas Clínicos</h3>
+      <div class="campo">
+        <label for="hospitalization_days">Días de hospitalización</label>
+        <input type="number" id="hospitalization_days" placeholder="ej. 3" />
+      </div>
+      <div class="campo">
+        <label for="body_temperature">Temperatura (°C)</label>
+        <input type="number" id="body_temperature" step="any" placeholder="ej. 38.5" />
+      </div>
+      <div class="campo">
+        <label for="fever">Fiebre</label>
+        <select id="fever">
           <option value="0">No</option>
           <option value="1">Sí</option>
         </select>
       </div>
-
       <div class="campo">
-        <label for="rash">¿Erupción cutánea (rash)?</label>
-        <select id="rash">
-          <option value="0">No</option>
-          <option value="1">Sí</option>
-        </select>
+        <label for="headache">Dolor de cabeza</label>
+        <select id="headache"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="dizziness">Mareos</label>
+        <select id="dizziness"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="loss_of_appetite">Pérdida de apetito</label>
+        <select id="loss_of_appetite"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="weakness">Debilidad</label>
+        <select id="weakness"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="myalgias">Mialgias (dolor muscular)</label>
+        <select id="myalgias"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="arthralgias">Artralgias (dolor articular)</label>
+        <select id="arthralgias"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="eye_pain">Dolor ocular</label>
+        <select id="eye_pain"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="hemorrhages">Hemorragias</label>
+        <select id="hemorrhages"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="vomiting">Vómitos</label>
+        <select id="vomiting"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="abdominal_pain">Dolor abdominal</label>
+        <select id="abdominal_pain"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="chills">Escalofríos</label>
+        <select id="chills"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="hemoptysis">Hemoptisis (tos con sangre)</label>
+        <select id="hemoptysis"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="edema">Edema</label>
+        <select id="edema"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="jaundice">Ictericia</label>
+        <select id="jaundice"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="bruises">Moretones</label>
+        <select id="bruises"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="petechiae">Petequias</label>
+        <select id="petechiae"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="rash">Erupción cutánea (rash)</label>
+        <select id="rash"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="diarrhea">Diarrea</label>
+        <select id="diarrhea"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="respiratory_difficulty">Dificultad respiratoria</label>
+        <select id="respiratory_difficulty"><option value="0">No</option><option value="1">Sí</option></select>
+      </div>
+      <div class="campo">
+        <label for="itching">Picazón (prurito)</label>
+        <select id="itching"><option value="0">No</option><option value="1">Sí</option></select>
       </div>
 
+      <!-- DATOS DEMOGRÁFICOS Y CLÍNICOS -->
+      <!-- DATOS DE LABORATORIO -->
+      <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Datos de Laboratorio</h3>
       <div class="campo">
-        <label for="abdominal_pain">¿Dolor abdominal?</label>
-        <select id="abdominal_pain">
-          <option value="0">No</option>
-          <option value="1">Sí</option>
-        </select>
+        <label for="hematocrit">Hematocrito (%)</label>
+        <input type="number" id="hematocrit" step="any" placeholder="ej. 42" />
       </div>
-
       <div class="campo">
-        <label for="dizziness">¿Mareos?</label>
-        <select id="dizziness">
-          <option value="0">No</option>
-          <option value="1">Sí</option>
-        </select>
-      </div>
-
-      <div class="campo">
-        <label for="chills">¿Escalofríos?</label>
-        <select id="chills">
-          <option value="0">No</option>
-          <option value="1">Sí</option>
-        </select>
-      </div>
-
-      <!-- OPCIONALES DE LABORATORIO -->
-      <div class="campo">
-        <label for="hemoglobin">Hemoglobina (opcional)</label>
+        <label for="hemoglobin">Hemoglobina (g/dL)</label>
         <input type="number" id="hemoglobin" step="any" placeholder="ej. 13.5" />
       </div>
       <div class="campo">
-        <label for="red_blood_cells">Glóbulos rojos (opcional)</label>
+        <label for="red_blood_cells">Glóbulos rojos (mill/uL)</label>
         <input type="number" id="red_blood_cells" step="any" placeholder="ej. 4.6" />
       </div>
       <div class="campo">
-        <label for="white_blood_cells">Glóbulos blancos (opcional)</label>
+        <label for="white_blood_cells">Glóbulos blancos (/uL)</label>
         <input type="number" id="white_blood_cells" step="any" placeholder="ej. 7000" />
+      </div>
+      <div class="campo">
+        <label for="platelets">Plaquetas (/uL)</label>
+        <input type="number" id="platelets" step="any" placeholder="ej. 150000" />
+      </div>
+      <div class="campo">
+        <label for="neutrophils">Neutrófilos (%)</label>
+        <input type="number" id="neutrophils" step="any" placeholder="ej. 60" />
+      </div>
+      <div class="campo">
+        <label for="eosinophils">Eosinófilos (%)</label>
+        <input type="number" id="eosinophils" step="any" placeholder="ej. 2" />
+      </div>
+      <div class="campo">
+        <label for="basophils">Basófilos (%)</label>
+        <input type="number" id="basophils" step="any" placeholder="ej. 0.5" />
+      </div>
+      <div class="campo">
+        <label for="monocytes">Monocitos (%)</label>
+        <input type="number" id="monocytes" step="any" placeholder="ej. 6" />
+      </div>
+      <div class="campo">
+        <label for="lymphocytes">Linfocitos (%)</label>
+        <input type="number" id="lymphocytes" step="any" placeholder="ej. 30" />
+      </div>
+      <div class="campo">
+        <label for="ast">AST (SGOT) (U/L)</label>
+        <input type="number" id="ast" step="any" placeholder="ej. 25" />
+      </div>
+      <div class="campo">
+        <label for="alt">ALT (SGPT) (U/L)</label>
+        <input type="number" id="alt" step="any" placeholder="ej. 30" />
+      </div>
+      <div class="campo">
+        <label for="alp">ALP (U/L)</label>
+        <input type="number" id="alp" step="any" placeholder="ej. 80" />
+      </div>
+      <div class="campo">
+        <label for="total_bilirubin">Bilirrubina Total (mg/dL)</label>
+        <input type="number" id="total_bilirubin" step="any" placeholder="ej. 0.8" />
+      </div>
+      <div class="campo">
+        <label for="total_proteins">Proteínas Totales (g/dL)</label>
+        <input type="number" id="total_proteins" step="any" placeholder="ej. 7.0" />
+      </div>
+      <div class="campo">
+        <label for="creatinine">Creatinina (mg/dL)</label>
+        <input type="number" id="creatinine" step="any" placeholder="ej. 0.9" />
+      </div>
+
+      <hr style="border:none;height:1px;background:rgba(15,23,42,0.1);margin:16px 0;">
+
+      <h3 style="font-size:14px; margin-top:10px; margin-bottom:10px;">Selección de Modelo</h3>
+      <div class="campo">
+        <label for="model_type">Modelo de IA</label>
+        <select id="model_type">
+          <option value="logistica">Regresión Logística (Rápido)</option>
+          <option value="red_neuronal">Red Neuronal (Preciso)</option>
+        </select>
       </div>
 
       <div class="actions">
-        <button id="predecir" class="btn btn-primary">Predecir (local)</button>
-        <button id="predecirServidor" class="btn btn-ghost" title="Enviar al servidor">Predecir (server)</button>
+        <button id="predecirServidor" class="btn btn-primary" title="Enviar al servidor para predicción con IA">Predecir con Modelo</button>
         <button id="clear" class="btn btn-ghost">Limpiar</button>
       </div>
-
-      <p class="small-note">Sugerencia: Este predictor usa una regla probabilística simple basada en la combinación de los 5 síntomas. Para mayor precisión integrar modelo entrenado del dataset.</p>
       
       <hr style="border:none;height:1px;background:rgba(15,23,42,0.1);margin:16px 0;">
       
@@ -401,7 +609,7 @@
       </div>
       
       <h3 style="font-size:14px; margin-bottom:8px;">Análisis por Lotes</h3>
-      <p class="desc" style="font-size:12px; margin-bottom:10px;">Carga un archivo Excel (.xlsx) para procesar múltiples casos</p>
+      <p class="desc" style="font-size:12px; margin-bottom:10px;">Carga un archivo Excel (.xlsx) o CSV (.csv) para procesar múltiples casos.</p>
       
       <div style="margin-bottom:12px;">
         <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
@@ -412,7 +620,7 @@
         <p style="font-size:12px; margin-bottom:0;"><strong id="fileName"></strong></p>
       </div>
       
-      <p class="small-note">El archivo debe tener las columnas: fever, rash, abdominal_pain, dizziness, chills. Opcionales: hemoglobin, red_blood_cells, white_blood_cells.</p>
+      <p class="small-note">El archivo debe contener las columnas con los datos clínicos y de laboratorio.</p>
     </div>
 
     <!-- CENTER: imagen grande + mini tarjetas -->
@@ -511,7 +719,6 @@
 
   <script>
     // Elementos
-    const btnPredecir = document.getElementById('predecir');
     const btnCargarArchivo = document.getElementById('btnCargarArchivo');
     const fileInput = document.getElementById('fileInput');
     const fileInfo = document.getElementById('fileInfo');
@@ -526,144 +733,50 @@
     const clearBtn = document.getElementById('clear');
 
     function getSymptoms() {
-      return {
-        fever: Number(document.getElementById('fiebre').value || 0),
-        rash: Number(document.getElementById('rash').value || 0),
-        abdominal_pain: Number(document.getElementById('abdominal_pain').value || 0),
-        dizziness: Number(document.getElementById('dizziness').value || 0),
-        chills: Number(document.getElementById('chills').value || 0),
-        // nuevos opcionales
-        hemoglobin: Number(document.getElementById('hemoglobin')?.value || 0),
-        red_blood_cells: Number(document.getElementById('red_blood_cells')?.value || 0),
-        white_blood_cells: Number(document.getElementById('white_blood_cells')?.value || 0),
-      };
-    }
-
-    // Lógica de predicción local (puntuación + normalización)
-    function predictLocal(sym) {
-      // Pesos heurísticos (ajustables)
-      const w = {
-        dengue:  { fever: 0.4, rash: 0.45, abdominal_pain: 0.35, dizziness: 0.0,  chills: -0.05 },
-        malaria: { fever: 0.5, rash: -0.2, abdominal_pain: 0.2, dizziness: 0.05, chills: 0.15 },
-        lepto:   { fever: 0.35, rash: -0.15, abdominal_pain: 0.05, dizziness: 0.35, chills: 0.6 }
-      };
-
-      // Calcular score bruto
-      let scoreD = Math.max(0, sym.fever*w.dengue.fever + sym.rash*w.dengue.rash + sym.abdominal_pain*w.dengue.abdominal_pain + sym.dizziness*w.dengue.dizziness + sym.chills*w.dengue.chills);
-      let scoreM = Math.max(0, sym.fever*w.malaria.fever + sym.rash*w.malaria.rash + sym.abdominal_pain*w.malaria.abdominal_pain + sym.dizziness*w.malaria.dizziness + sym.chills*w.malaria.chills);
-      let scoreL = Math.max(0, sym.fever*w.lepto.fever + sym.rash*w.lepto.rash + sym.abdominal_pain*w.lepto.abdominal_pain + sym.dizziness*w.lepto.dizziness + sym.chills*w.lepto.chills);
-
-      const total = scoreD + scoreM + scoreL;
-
-      if (total === 0) {
-        return { label: null, confidences: { dengue:0, malaria:0, leptospirosis:0 } };
-      }
-
-      // Normalizar a porcentajes
-      const pD = Math.round((scoreD / total) * 100);
-      const pM = Math.round((scoreM / total) * 100);
-      const pL = Math.round((scoreL / total) * 100);
-
-      // Elegir la mayor probabilidad; desempate por score bruto
-      const arr = [
-        { name: 'Dengue', key: 'dengue', p: pD, raw: scoreD },
-        { name: 'Malaria', key: 'malaria', p: pM, raw: scoreM },
-        { name: 'Leptospirosis', key: 'leptospirosis', p: pL, raw: scoreL },
-      ];
-      arr.sort((a,b) => b.raw - a.raw);
-
-      return {
-        label: arr[0].name,
-        key: arr[0].key,
-        confidences: { dengue: pD, malaria: pM, leptospirosis: pL },
-        raw: { dengue: scoreD, malaria: scoreM, leptospirosis: scoreL }
-      };
-    }
-
-    // Render de resultado bonito
-    function renderResult(pred, sym) {
-      const container = document.createElement('div');
-      container.innerHTML = ''; // limpiar
-      if (outputInitial) outputInitial.style.display = 'none';
-
-      if (!pred.label) {
-        const title = document.createElement('div');
-        title.innerHTML = '<p style="color:var(--muted)"><b>No se puede determinar</b>: los síntomas no aportan información suficiente.</p>';
-        container.appendChild(title);
-      } else {
-        const resultTag = document.createElement('div');
-        resultTag.className = 'enfermedad ' + (pred.key === 'dengue' ? 'dengue' : pred.key === 'malaria' ? 'malaria' : 'leptospirosis');
-        resultTag.textContent = 'Posible contagio de ' + pred.label;
-        container.appendChild(resultTag);
-
-        const ul = document.createElement('ul');
-        ul.className = 'result-list';
-        const items = [
-          { title: 'Dengue', pct: pred.confidences.dengue },
-          { title: 'Malaria', pct: pred.confidences.malaria },
-          { title: 'Leptospirosis', pct: pred.confidences.leptospirosis }
-        ];
-        items.forEach(it => {
-          const li = document.createElement('li');
-          li.innerHTML = `
-            <div style="display:flex;flex-direction:column">
-              <strong>${it.title}</strong>
-              <small style="color:var(--muted)">Probabilidad estimada</small>
-            </div>
-            <div style="width:45%; text-align:right">
-              <span class="badge">${it.pct}%</span>
-            </div>
-            <div style="width:100%; margin-top:8px;">
-              <div class="progress" aria-hidden="true"><i style="width:${it.pct}%;"></i></div>
-            </div>`;
-          ul.appendChild(li);
+        const allInputs = document.querySelectorAll('.campo select, .campo input');
+        const symptoms = {};
+        allInputs.forEach(input => {
+            if (input.id && input.value !== '') {
+                symptoms[input.id] = input.value;
+            }
         });
-        container.appendChild(ul);
-      }
 
-      // Mostrar síntomas ingresados
-      const symBox = document.createElement('div');
-      symBox.style.marginTop = '12px';
-      symBox.innerHTML = `
-        <hr style="border:none;height:1px;background:rgba(15,23,42,0.04);margin:12px 0;">
-        <p style="font-weight:700;margin-bottom:6px;">Síntomas ingresados</p>
-        <ul style="list-style:none;padding-left:0;color:var(--muted)">
-          <li>Fiebre: <b>${sym.fever ? 'Sí' : 'No'}</b></li>
-          <li>Rash: <b>${sym.rash ? 'Sí' : 'No'}</b></li>
-          <li>Dolor abdominal: <b>${sym.abdominal_pain ? 'Sí' : 'No'}</b></li>
-          <li>Mareos: <b>${sym.dizziness ? 'Sí' : 'No'}</b></li>
-          <li>Escalofríos: <b>${sym.chills ? 'Sí' : 'No'}</b></li>
-        </ul>`;
-      container.appendChild(symBox);
+        // Manejar campos especiales
+        // 1. Sexo: 'male' es 1 si es masculino, 0 si es femenino. 'female' es lo opuesto.
+        if ('male' in symptoms) {
+            symptoms['female'] = symptoms['male'] === '1' ? '0' : '1';
+        }
 
-      // Replace contenido del resultadoBox
-      resultadoBox.innerHTML = '<h3 style="margin-bottom:10px;color:var(--accent);">Resultados del Análisis</h3>';
-      resultadoBox.appendChild(container);
-      // animación barras
-      setTimeout(()=> {
-        document.querySelectorAll('.progress > i').forEach(el => {
-          const w = el.style.width;
-          el.style.width = '0%';
-          setTimeout(()=> el.style.width = w, 50);
+        // 2. Origen: 'urban_origin' es 1 si es urbano, 0 si es rural. 'rural_origin' es lo opuesto.
+        if ('urban_origin' in symptoms) {
+            symptoms['rural_origin'] = symptoms['urban_origin'] === '1' ? '0' : '1';
+        }
+
+        // 3. Ocupación: Crear columnas one-hot
+        const occupationValue = symptoms['occupation'];
+        const occupations = ['homemaker', 'student', 'professional', 'merchant', 'agriculture_livestock', 'various_jobs', 'unemployed'];
+        occupations.forEach(occ => {
+            symptoms[occ] = (occ === occupationValue) ? '1' : '0';
         });
-      }, 80);
-    }
+        delete symptoms['occupation']; // Eliminar la clave original
 
-    // EVENTOS
-    btnPredecir.addEventListener('click', () => {
-      const sym = getSymptoms();
-      const pred = predictLocal(sym);
-      renderResult(pred, sym);
-    });
+        // 4. Bilirrubinas: Si no se proveen, no se pueden calcular.
+        if (symptoms.total_bilirubin && symptoms.direct_bilirubin) {
+            symptoms.indirect_bilirubin = parseFloat(symptoms.total_bilirubin) - parseFloat(symptoms.direct_bilirubin);
+        }
+        return symptoms;
+    }
 
     // Limpiar formulario
     clearBtn.addEventListener('click', () => {
-      ['fiebre','rash','abdominal_pain','dizziness','chills','hemoglobin','red_blood_cells','white_blood_cells'].forEach(id => {
+      const allInputs = document.querySelectorAll('.campo select, .campo input');
+      allInputs.forEach(input => {
+        const id = input.id;
         const el = document.getElementById(id);
         if (!el) return;
         if (el.tagName === 'SELECT') el.value = '0'; else el.value = '';
       });
-      resultadoBox.innerHTML = '<h3 style="margin-bottom:10px;color:var(--accent);">Resultados del Análisis</h3><div id="outputInitial"><p style="color:var(--muted)">No hay resultados aún. Completa los síntomas y presiona <b>Predecir (local)</b>.</p></div>';
+      resultadoBox.innerHTML = '<h3 style="margin-bottom:10px;color:var(--accent);">Resultados del Análisis</h3><div id="outputInitial"><p style="color:var(--muted)">No hay resultados aún. Completa los síntomas y presiona <b>Predecir con Modelo</b>.</p></div>';
       if (outputInitial) outputInitial.style.display = 'block';
     });
 
@@ -671,29 +784,29 @@
     btnPredecirSrv.addEventListener('click', async () => {
       const formData = new FormData();
       const sym = getSymptoms();
-      // agregamos los campos base
-      formData.append('fever', sym.fever);
-      formData.append('rash', sym.rash);
-      formData.append('abdominal_pain', sym.abdominal_pain);
-      formData.append('dizziness', sym.dizziness);
-      formData.append('chills', sym.chills);
-      // opcionales solo si hay valor
-      const hem = document.getElementById('hemoglobin')?.value;
-      if (hem !== undefined && hem !== '') formData.append('hemoglobin', hem);
-      const rbc = document.getElementById('red_blood_cells')?.value;
-      if (rbc !== undefined && rbc !== '') formData.append('red_blood_cells', rbc);
-      const wbc = document.getElementById('white_blood_cells')?.value;
-      if (wbc !== undefined && wbc !== '') formData.append('white_blood_cells', wbc);
-
+      for (const key in sym) {
+          formData.append(key, sym[key]);
+      }
+      
       resultadoBox.innerHTML = '<p>🧠 Enviando al servidor...</p>';
-      try {
+      try { 
         const res = await fetch('/predecir', { method:'POST', body: formData });
         const data = await res.json();
         if (data.resultado || data.prediccion) {
           const label = data.resultado || data.prediccion;
-          resultadoBox.innerHTML = `<h3 style="margin-bottom:10px;color:var(--accent);">Resultados del Análisis</h3><div class="enfermedad ${label.toLowerCase()}">${label}</div>`;
+          const labelClass = label.toLowerCase().replace(/\s/g, '-');
+          resultadoBox.innerHTML = `
+            <h3 style="margin-bottom:10px;color:var(--accent);">Resultado del Modelo</h3>
+            <div class="enfermedad ${labelClass}">
+              Predicción: <strong>${label}</strong>
+            </div>
+          `;
         } else {
-          resultadoBox.innerHTML = `<p style="color:${data.error ? 'var(--danger)' : 'var(--muted)'}">${data.error || 'Error desconocido'}</p>`;
+          resultadoBox.innerHTML = `
+            <h3 style="margin-bottom:10px;color:var(--danger);">Error en la Predicción</h3>
+            <p style="color:var(--danger); font-size:14px;">${data.error || 'Ocurrió un error desconocido.'}</p>
+            <p style="font-size:12px; color:var(--muted); margin-top:10px;">Por favor, revisa los valores ingresados.</p>
+          `;
         }
       } catch (err) {
         resultadoBox.innerHTML = `<p style="color:var(--danger)"><b>Error:</b> No se pudo contactar el servidor.</p>`;
@@ -715,41 +828,56 @@
           return;
         }
         
+        // Función para generar el HTML de un modelo
+        const createModelHTML = (modelData, modelName) => {
+          return `
+            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+              <h3 style="color: var(--accent); margin-bottom: 16px;">${modelName}</h3>
+              <div style="margin-bottom:20px; padding:16px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); 
+                          border-radius:12px; color:white; text-align:center;">
+                <div style="font-size:20px; font-weight:700; margin-bottom:8px;">
+                  Precisión
+                </div>
+                <div style="font-size:40px; font-weight:900;">
+                  ${(modelData.precision * 100).toFixed(2)}%
+                </div>
+              </div>
+              
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:20px;">
+                <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                  <h4 style="margin-bottom:10px; color:var(--accent);">Matriz de Confusión</h4>
+                  <img src="data:image/png;base64,${modelData.grafica_confusion}" 
+                       style="width:100%; height:auto; border-radius:8px;" alt="Matriz de Confusión"
+                       class="grafica-clickable" onclick="abrirModal(this.src)">
+                </div>
+                <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                  <h4 style="margin-bottom:10px; color:var(--accent);">Distribución</h4>
+                  <img src="data:image/png;base64,${modelData.grafica_dispersion}" 
+                       style="width:100%; height:auto; border-radius:8px;" alt="Gráfica de Dispersión"
+                       class="grafica-clickable" onclick="abrirModal(this.src)">
+                </div>
+              </div>
+            </div>
+          `;
+        };
+
         // Crear contenedor para resultados
         const container = document.createElement('div');
-        
-        // Mostrar precisión
-        const precisionHTML = `
-          <div style="margin-bottom:20px; padding:16px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); 
-                      border-radius:12px; color:white; text-align:center;">
-            <div style="font-size:24px; font-weight:800; margin-bottom:8px;">
-              Precisión del Modelo
-            </div>
-            <div style="font-size:48px; font-weight:900;">
-              ${(data.precision * 100).toFixed(2)}%
-            </div>
-          </div>
-        `;
-        
-        // Crear layout de 2 columnas para los gráficos
-        const graficasHTML = `
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:20px;">
-            <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-              <h4 style="margin-bottom:10px; color:var(--accent);">Matriz de Confusión (Real vs Predicción)</h4>
-              <img src="data:image/png;base64,${data.grafica_confusion}" 
-                   style="width:100%; height:auto; border-radius:8px;" alt="Matriz de Confusión"
-                   class="grafica-clickable" onclick="abrirModal(this.src)">
-            </div>
-            <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-              <h4 style="margin-bottom:10px; color:var(--accent);">Distribución y Predicciones</h4>
-              <img src="data:image/png;base64,${data.grafica_dispersion}" 
-                   style="width:100%; height:auto; border-radius:8px;" alt="Gráfica de Dispersión"
-                   class="grafica-clickable" onclick="abrirModal(this.src)">
-            </div>
-          </div>
-        `;
-        
-        container.innerHTML = precisionHTML + graficasHTML;
+        let finalHTML = '';
+
+        if (data.logistica) {
+          finalHTML += createModelHTML(data.logistica, "Regresión Logística");
+        }
+
+        if (data.red_neuronal) {
+          finalHTML += createModelHTML(data.red_neuronal, "Red Neuronal (MLP)");
+        }
+
+        if (finalHTML === '') {
+            container.innerHTML = '<p>No se recibieron datos de evaluación.</p>';
+        } else {
+            container.innerHTML = finalHTML;
+        }
         
         // Limpiar y mostrar resultados
         resultadoBox.innerHTML = '<h3 style="margin-bottom:10px;color:var(--accent);">Resultados de Evaluación del Modelo</h3>';

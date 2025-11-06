@@ -1,6 +1,6 @@
 # app.py
-from flask import Flask, render_template, request, jsonify
-from modelo import predecir_enfermedad, evaluar_modelo, predecir_lote
+from flask import Flask, render_template, request, jsonify, send_from_directory
+from modelo import predecir_enfermedad, evaluar_modelo, predecir_lote, cargar_modelo
 import os
 
 app = Flask(__name__)
@@ -17,21 +17,21 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 def home():
     return render_template('index.html')
 
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
+
 # ==============================
 # PREDICCIÓN DESDE EL FORMULARIO
 # ==============================
 @app.route('/predecir', methods=['POST'])
 def predecir():
     try:
-        sintomas = {
-            'fever': int(request.form.get('fever', 0)),
-            'rash': int(request.form.get('rash', 0)),
-            'abdominal_pain': int(request.form.get('abdominal_pain', 0)),
-            'dizziness': int(request.form.get('dizziness', 0)),
-            'chills': int(request.form.get('chills', 0))
-        }
-
-        resultado = predecir_enfermedad(sintomas)
+        # Recoger todos los datos del formulario dinámicamente
+        sintomas = request.form.to_dict()
+        # Extraer el tipo de modelo, con un valor por defecto si no se envía
+        tipo_modelo = sintomas.pop('model_type', 'logistica')
+        resultado = predecir_enfermedad(sintomas, tipo_modelo=tipo_modelo)
         return jsonify({'resultado': resultado})
     except Exception as e:
         return jsonify({'error': str(e)})
@@ -56,14 +56,14 @@ def predecir_lote_endpoint():
         if 'file' not in request.files:
             return jsonify({'error': 'No se proporcionó ningún archivo'}), 400
         
-        file = request.files['file']
+        file = request.files['file'] 
         
         if file.filename == '':
             return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
         
         # Verificar extensión
-        if not file.filename.endswith(('.xlsx', '.xls')):
-            return jsonify({'error': 'El archivo debe ser Excel (.xlsx o .xls)'}), 400
+        if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
+            return jsonify({'error': 'El archivo debe ser de tipo Excel (.xlsx, .xls) o CSV (.csv)'}), 400
         
         # Guardar archivo temporalmente
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -89,4 +89,5 @@ def predecir_lote_endpoint():
 # EJECUCIÓN LOCAL
 # ==============================
 if __name__ == '__main__':
+    cargar_modelo() # Carga el modelo al iniciar la app
     app.run(debug=True)
