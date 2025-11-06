@@ -159,21 +159,21 @@ def entrenar_modelo():
     print("🧬 Distribución de clases (después de SMOTE):")
     print(pd.Series(y_train_resampled).value_counts())
 
+    # 1. Ajustar el scaler SOLO con los datos de entrenamiento originales.
     scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_train_scaled = scaler.fit_transform(X_train_resampled)
+    scaler.fit(X_train)
+
+    # 2. Transformar los datos de entrenamiento (con SMOTE) y de prueba con el scaler ya ajustado.
+    X_train_scaled = scaler.transform(X_train_resampled)
     X_test_scaled = scaler.transform(X_test)
     
-    # Entrenar Regresión Logística
+    # 3. Entrenar los modelos con los datos balanceados y escalados correctamente.
     model_logistica = LogisticRegression(random_state=42, max_iter=1000)
-    model_logistica.fit(X_train_scaled, y_train)
     model_logistica.fit(X_train_scaled, y_train_resampled)
     accuracy_logistica = model_logistica.score(X_test_scaled, y_test)
     print(f"✅ Modelo de Regresión Logística entrenado con una precisión del {accuracy_logistica*100:.2f}%")
 
-    # Entrenar Red Neuronal (MLP)
     model_mlp = MLPClassifier(random_state=42, max_iter=1000, hidden_layer_sizes=(100, 50), alpha=0.0001, solver='adam', learning_rate='adaptive')
-    model_mlp.fit(X_train_scaled, y_train)
     model_mlp.fit(X_train_scaled, y_train_resampled)
     accuracy_mlp = model_mlp.score(X_test_scaled, y_test)
     print(f"✅ Modelo de Red Neuronal (MLP) entrenado con una precisión del {accuracy_mlp*100:.2f}%")

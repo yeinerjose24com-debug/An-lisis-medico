@@ -1,6 +1,7 @@
 # app.py
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from modelo import predecir_enfermedad, evaluar_modelo, predecir_lote, cargar_modelo
+import json
 import os
 
 app = Flask(__name__)
@@ -15,11 +16,26 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # ==============================
 @app.route('/')
 def home():
-    return render_template('index.html')
+    # Flask lee los parámetros del modelo y los inyecta en la plantilla.
+    # Esto es necesario para que el frontend pueda acceder a ellos si es necesario,
+    # aunque la predicción principal se haga en el servidor.
+    try:
+        with open('model_params.json', 'r') as f:
+            model_params_json = f.read()
+    except FileNotFoundError:
+        model_params_json = "{}"  # Enviar un objeto JSON vacío si no se encuentra
+    return render_template('index.html', model_params=model_params_json)
 
 @app.route('/static/<path:path>')
 def send_static(path):
     return send_from_directory('static', path)
+
+# ==============================
+# RUTA PARA SERVIR EL MODELO JSON
+# ==============================
+@app.route('/model_params.json')
+def send_model_params():
+    return send_from_directory('.', 'model_params.json')
 
 # ==============================
 # PREDICCIÓN DESDE EL FORMULARIO
