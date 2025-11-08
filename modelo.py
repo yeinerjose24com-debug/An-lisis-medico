@@ -144,37 +144,60 @@ def entrenar_modelo():
     
     y = y.map(lambda v: label_map.get(v, v))
     
-    print("🧬 Distribución de clases:")
-
-    print("🧬 Distribución de clases (antes de SMOTE):")
+    print("🧬 Distribución de clases original:")
     print(y.value_counts())
     
-    # Entrenar modelo
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # --- NUEVO: Forzar un balanceo perfecto a 50 muestras por clase ---
+    print("\n⚖️ Forzando balanceo a 50 muestras por clase...")
+    N_SAMPLES_PER_CLASS = 51
+    X_balanced_list = []
+    y_balanced_list = []
+
+    for disease_name in label_map.values():
+        # Filtrar datos por clase
+        X_class = X[y == disease_name]
+        y_class = y[y == disease_name]
+        
+        current_samples = len(X_class)
+        print(f"   - Clase '{disease_name}': {current_samples} muestras encontradas.")
+
+        if current_samples > N_SAMPLES_PER_CLASS:
+            # Submuestreo (undersampling) si hay más de 50
+            print(f"     -> Reduciendo a {N_SAMPLES_PER_CLASS} muestras.")
+            X_res, y_res = X_class.sample(n=N_SAMPLES_PER_CLASS, random_state=42), y_class.sample(n=N_SAMPLES_PER_CLASS, random_state=42)
+        elif current_samples < N_SAMPLES_PER_CLASS:
+            # Sobremuestreo (oversampling) si hay menos de 50
+            print(f"     -> Aumentando a {N_SAMPLES_PER_CLASS} muestras (con reemplazo).")
+            X_res, y_res = X_class.sample(n=N_SAMPLES_PER_CLASS, replace=True, random_state=42), y_class.sample(n=N_SAMPLES_PER_CLASS, replace=True, random_state=42)
+        else:
+            # Si ya tiene 50, se usa tal cual
+            X_res, y_res = X_class, y_class
+
+        X_balanced_list.append(X_res)
+        y_balanced_list.append(y_res)
+
+    # Combinar los dataframes balanceados
+    X = pd.concat(X_balanced_list)
+    y = pd.concat(y_balanced_list)
+
+    print("\n🧬 Distribución de clases después del balanceo forzado:")
+    print(y.value_counts())
     
-    # Aplicar SMOTE para balancear las clases SOLO en el conjunto de entrenamiento
-    print("⚖️ Aplicando SMOTE para balancear los datos de entrenamiento...")
-    smote = SMOTE(random_state=42)
-    X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
-    print("🧬 Distribución de clases (después de SMOTE):")
-    print(pd.Series(y_train_resampled).value_counts())
-
-    # 1. Ajustar el scaler SOLO con los datos de entrenamiento originales.
+    # Dividir los datos YA BALANCEADOS en entrenamiento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    
     scaler = StandardScaler()
-    scaler.fit(X_train)
-
-    # 2. Transformar los datos de entrenamiento (con SMOTE) y de prueba con el scaler ya ajustado.
-    X_train_scaled = scaler.transform(X_train_resampled)
+    X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
-    # 3. Entrenar los modelos con los datos balanceados y escalados correctamente.
+    # Entrenar los modelos con los datos balanceados y escalados.
     model_logistica = LogisticRegression(random_state=42, max_iter=1000)
-    model_logistica.fit(X_train_scaled, y_train_resampled)
+    model_logistica.fit(X_train_scaled, y_train)
     accuracy_logistica = model_logistica.score(X_test_scaled, y_test)
     print(f"✅ Modelo de Regresión Logística entrenado con una precisión del {accuracy_logistica*100:.2f}%")
 
     model_mlp = MLPClassifier(random_state=42, max_iter=1000, hidden_layer_sizes=(100, 50), alpha=0.0001, solver='adam', learning_rate='adaptive')
-    model_mlp.fit(X_train_scaled, y_train_resampled)
+    model_mlp.fit(X_train_scaled, y_train)
     accuracy_mlp = model_mlp.score(X_test_scaled, y_test)
     print(f"✅ Modelo de Red Neuronal (MLP) entrenado con una precisión del {accuracy_mlp*100:.2f}%")
     
@@ -220,6 +243,7 @@ def predecir_enfermedad(sintomas, tipo_modelo='logistica'):
         print("🧠 Usando modelo de predicción: Regresión Logística")
         pred = model_logistica.predict(entrada_scaled)[0]
         
+        
     return pred
 
 # ===============================
@@ -248,9 +272,39 @@ def evaluar_modelo():
         if posibles:
             target_col_name = posibles[0]
     
-    # Reindexar para asegurar que las columnas coincidan con las del modelo
-    X = data.reindex(columns=expected_cols, fill_value=0.0)
-    y_true = data[target_col_name].map(lambda v: label_map.get(v, v))
+    # --- NUEVO: Forzar balanceo a 50 muestras por clase para la evaluación ---
+    # Esto asegura que la matriz de confusión refleje un dataset balanceado.
+    print("\n⚖️ Forzando balanceo a 50 muestras por clase para evaluación...")
+    N_SAMPLES_PER_CLASS = 51
+    
+    # Combinar X e y temporalmente para el muestreo
+    X_original = data.reindex(columns=expected_cols, fill_value=0.0)
+    y_original = data[target_col_name].map(lambda v: label_map.get(v, v))
+    
+    data_for_eval = X_original.copy()
+    data_for_eval['__target__'] = y_original
+    
+    balanced_dfs = []
+    for disease_name in label_map.values():
+        class_df = data_for_eval[data_for_eval['__target__'] == disease_name]
+        current_samples = len(class_df)
+        
+        if current_samples > N_SAMPLES_PER_CLASS:
+            res_df = class_df.sample(n=N_SAMPLES_PER_CLASS, random_state=42)
+        elif current_samples < N_SAMPLES_PER_CLASS:
+            res_df = class_df.sample(n=N_SAMPLES_PER_CLASS, replace=True, random_state=42)
+        else:
+            res_df = class_df
+        balanced_dfs.append(res_df)
+        
+    balanced_data = pd.concat(balanced_dfs)
+    
+    # Separar X e y del dataset ya balanceado
+    X = balanced_data.drop(columns=['__target__'])
+    y_true = balanced_data['__target__']
+    
+    print("\n🧬 Distribución de clases para evaluación:")
+    print(y_true.value_counts())
     
     # Predecir con el modelo
     X_scaled = scaler.transform(X)
@@ -297,27 +351,39 @@ def evaluar_modelo():
 def generar_matriz_confusion(y_true, y_pred, model_name=""):
     """Genera gráfica de matriz de confusión"""
     fig, ax = plt.subplots(figsize=(8, 6))
-    cm = confusion_matrix(y_true, y_pred)
+    clases = list(label_map.values())
+    cm = confusion_matrix(y_true, y_pred, labels=clases)
     
-    im = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-    ax.figure.colorbar(im, ax=ax)
+    # Usar un colormap más moderno y agradable
+    im = ax.imshow(cm, interpolation='nearest', cmap='viridis')
+    
+    # Añadir una barra de color para referencia
+    cbar = ax.figure.colorbar(im, ax=ax, shrink=0.8)
+    cbar.ax.set_ylabel('Número de casos', rotation=-90, va="bottom")
     
     # Etiquetas
-    clases = list(label_map.values())
     ax.set(xticks=np.arange(cm.shape[1]),
            yticks=np.arange(cm.shape[0]),
            xticklabels=clases, yticklabels=clases,
            title=f'Matriz de Confusión ({model_name})',
            ylabel='Etiqueta Real',
            xlabel='Etiqueta Predicha')
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     
     # Agregar valores en cada celda
-    thresh = cm.max() / 2.
+    # El umbral de color de texto se ajusta para el colormap 'viridis'
+    thresh = cm.max() * 0.55
+    row_sums = cm.sum(axis=1) # Suma de cada fila (total de casos reales por clase)
+
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
-            ax.text(j, i, format(cm[i, j], 'd'),
+            count = cm[i, j]
+            # Evitar división por cero si una clase no tiene muestras
+            percentage = f"{(count / row_sums[i] * 100):.1f}%" if row_sums[i] > 0 else "0.0%"
+            ax.text(j, i, f"{count}\n({percentage})",
                    ha="center", va="center",
-                   color="white" if cm[i, j] > thresh else "black")
+                   color="white" if count > thresh else "black",
+                   fontsize=10, weight='bold', linespacing=1.5)
     
     plt.tight_layout()
     return fig

@@ -35,10 +35,10 @@
     }
 
     .contenedor{
-      width: 1200px;
+    width: 90%;
       display:grid;
-      grid-template-columns: 340px 1fr 360px;
-      gap:20px;
+      grid-template-columns: 360px 1fr 380px; /* Columnas ajustadas */
+      gap:24px;
       align-items:start;
       background: transparent;
     }
@@ -302,6 +302,8 @@
       border-radius: 12px;
       padding: 20px;
       animation: slideDown 0.3s;
+      max-height: 90vh; /* Limita la altura máxima */
+      overflow-y: auto; /* Añade scroll vertical si es necesario */
     }
 
     .close {
@@ -378,209 +380,214 @@
         </div>
       </div>
       
-      <h3>Datos del Paciente</h3>
-      <p class="desc">Completa los campos para obtener una predicción del modelo de IA.</p>
+      <!-- Botón para desplegar el formulario -->
+      <button id="togglePatientDataBtn" class="btn btn-primary" style="width:100%; margin-bottom: 15px;">Registrar Datos del Paciente</button>
 
-      <!-- DATOS DEMOGRÁFICOS -->
-      <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Datos Demográficos</h3>
-      <div class="campo">
-        <label for="age">Edad</label>
-        <input type="number" id="age" placeholder="ej. 35" />
-      </div>
-      <div class="campo">
-        <label for="male">Sexo</label>
-        <select id="male">
-          <option value="0">Femenino</option>
-          <option value="1">Masculino</option>
-        </select>
-      </div>
-      <div class="campo">
-        <label for="urban_origin">Origen</label>
-        <select id="urban_origin">
-          <option value="1">Urbano</option>
-          <option value="0">Rural</option>
-        </select>
-      </div>
+      <!-- Contenedor del formulario que se puede ocultar/mostrar -->
+      <div id="patientDataForm" style="display: none;">
+        <h3>Datos del Paciente</h3>
+        <p class="desc">Completa los campos para obtener una predicción del modelo de IA.</p>
 
-      <!-- OCUPACIÓN -->
-      <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Ocupación</h3>
-      <div class="campo">
-        <label for="occupation">Ocupación Principal</label>
-        <select id="occupation">
-          <option value="unemployed">Desempleado/Otro</option>
-          <option value="homemaker">Ama de casa</option>
-          <option value="student">Estudiante</option>
-          <option value="professional">Profesional</option>
-          <option value="merchant">Comerciante</option>
-          <option value="agriculture_livestock">Agricultura/Ganadería</option>
-          <option value="various_jobs">Trabajos varios</option>
-        </select>
-      </div>
+        <!-- DATOS DEMOGRÁFICOS -->
+        <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Datos Demográficos</h3>
+        <div class="campo">
+          <label for="age">Edad</label>
+          <input type="number" id="age" placeholder="ej. 35" />
+        </div>
+        <div class="campo">
+          <label for="male">Sexo</label>
+          <select id="male">
+            <option value="0">Femenino</option>
+            <option value="1">Masculino</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="urban_origin">Origen</label>
+          <select id="urban_origin">
+            <option value="1">Urbano</option>
+            <option value="0">Rural</option>
+          </select>
+        </div>
 
-      <!-- SÍNTOMAS CLÍNICOS -->
-      <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Síntomas Clínicos</h3>
-      <div class="campo">
-        <label for="hospitalization_days">Días de hospitalización</label>
-        <input type="number" id="hospitalization_days" placeholder="ej. 3" />
-      </div>
-      <div class="campo">
-        <label for="body_temperature">Temperatura (°C)</label>
-        <input type="number" id="body_temperature" step="any" placeholder="ej. 38.5" />
-      </div>
-      <div class="campo">
-        <label for="fever">Fiebre</label>
-        <select id="fever">
-          <option value="0">No</option>
-          <option value="1">Sí</option>
-        </select>
-      </div>
-      <div class="campo">
-        <label for="headache">Dolor de cabeza</label>
-        <select id="headache"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="dizziness">Mareos</label>
-        <select id="dizziness"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="loss_of_appetite">Pérdida de apetito</label>
-        <select id="loss_of_appetite"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="weakness">Debilidad</label>
-        <select id="weakness"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="myalgias">Mialgias (dolor muscular)</label>
-        <select id="myalgias"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="arthralgias">Artralgias (dolor articular)</label>
-        <select id="arthralgias"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="eye_pain">Dolor ocular</label>
-        <select id="eye_pain"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="hemorrhages">Hemorragias</label>
-        <select id="hemorrhages"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="vomiting">Vómitos</label>
-        <select id="vomiting"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="abdominal_pain">Dolor abdominal</label>
-        <select id="abdominal_pain"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="chills">Escalofríos</label>
-        <select id="chills"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="hemoptysis">Hemoptisis (tos con sangre)</label>
-        <select id="hemoptysis"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="edema">Edema</label>
-        <select id="edema"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="jaundice">Ictericia</label>
-        <select id="jaundice"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="bruises">Moretones</label>
-        <select id="bruises"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="petechiae">Petequias</label>
-        <select id="petechiae"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="rash">Erupción cutánea (rash)</label>
-        <select id="rash"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="diarrhea">Diarrea</label>
-        <select id="diarrhea"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="respiratory_difficulty">Dificultad respiratoria</label>
-        <select id="respiratory_difficulty"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
-      <div class="campo">
-        <label for="itching">Picazón (prurito)</label>
-        <select id="itching"><option value="0">No</option><option value="1">Sí</option></select>
-      </div>
+        <!-- OCUPACIÓN -->
+        <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Ocupación</h3>
+        <div class="campo">
+          <label for="occupation">Ocupación Principal</label>
+          <select id="occupation">
+            <option value="unemployed">Desempleado/Otro</option>
+            <option value="homemaker">Ama de casa</option>
+            <option value="student">Estudiante</option>
+            <option value="professional">Profesional</option>
+            <option value="merchant">Comerciante</option>
+            <option value="agriculture_livestock">Agricultura/Ganadería</option>
+            <option value="various_jobs">Trabajos varios</option>
+          </select>
+        </div>
 
-      <!-- DATOS DEMOGRÁFICOS Y CLÍNICOS -->
-      <!-- DATOS DE LABORATORIO -->
-      <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Datos de Laboratorio</h3>
-      <div class="campo">
-        <label for="hematocrit">Hematocrito (%)</label>
-        <input type="number" id="hematocrit" step="any" placeholder="ej. 42" />
-      </div>
-      <div class="campo">
-        <label for="hemoglobin">Hemoglobina (g/dL)</label>
-        <input type="number" id="hemoglobin" step="any" placeholder="ej. 13.5" />
-      </div>
-      <div class="campo">
-        <label for="red_blood_cells">Glóbulos rojos (mill/uL)</label>
-        <input type="number" id="red_blood_cells" step="any" placeholder="ej. 4.6" />
-      </div>
-      <div class="campo">
-        <label for="white_blood_cells">Glóbulos blancos (/uL)</label>
-        <input type="number" id="white_blood_cells" step="any" placeholder="ej. 7000" />
-      </div>
-      <div class="campo">
-        <label for="platelets">Plaquetas (/uL)</label>
-        <input type="number" id="platelets" step="any" placeholder="ej. 150000" />
-      </div>
-      <div class="campo">
-        <label for="neutrophils">Neutrófilos (%)</label>
-        <input type="number" id="neutrophils" step="any" placeholder="ej. 60" />
-      </div>
-      <div class="campo">
-        <label for="eosinophils">Eosinófilos (%)</label>
-        <input type="number" id="eosinophils" step="any" placeholder="ej. 2" />
-      </div>
-      <div class="campo">
-        <label for="basophils">Basófilos (%)</label>
-        <input type="number" id="basophils" step="any" placeholder="ej. 0.5" />
-      </div>
-      <div class="campo">
-        <label for="monocytes">Monocitos (%)</label>
-        <input type="number" id="monocytes" step="any" placeholder="ej. 6" />
-      </div>
-      <div class="campo">
-        <label for="lymphocytes">Linfocitos (%)</label>
-        <input type="number" id="lymphocytes" step="any" placeholder="ej. 30" />
-      </div>
-      <div class="campo">
-        <label for="ast">AST (SGOT) (U/L)</label>
-        <input type="number" id="ast" step="any" placeholder="ej. 25" />
-      </div>
-      <div class="campo">
-        <label for="alt">ALT (SGPT) (U/L)</label>
-        <input type="number" id="alt" step="any" placeholder="ej. 30" />
-      </div>
-      <div class="campo">
-        <label for="alp">ALP (U/L)</label>
-        <input type="number" id="alp" step="any" placeholder="ej. 80" />
-      </div>
-      <div class="campo">
-        <label for="total_bilirubin">Bilirrubina Total (mg/dL)</label>
-        <input type="number" id="total_bilirubin" step="any" placeholder="ej. 0.8" />
-      </div>
-      <div class="campo">
-        <label for="total_proteins">Proteínas Totales (g/dL)</label>
-        <input type="number" id="total_proteins" step="any" placeholder="ej. 7.0" />
-      </div>
-      <div class="campo">
-        <label for="creatinine">Creatinina (mg/dL)</label>
-        <input type="number" id="creatinine" step="any" placeholder="ej. 0.9" />
+        <!-- SÍNTOMAS CLÍNICOS -->
+        <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Síntomas Clínicos</h3>
+        <div class="campo">
+          <label for="hospitalization_days">Días de hospitalización</label>
+          <input type="number" id="hospitalization_days" placeholder="ej. 3" />
+        </div>
+        <div class="campo">
+          <label for="body_temperature">Temperatura (°C)</label>
+          <input type="number" id="body_temperature" step="any" placeholder="ej. 38.5" />
+        </div>
+        <div class="campo">
+          <label for="fever">Fiebre</label>
+          <select id="fever">
+            <option value="0">No</option>
+            <option value="1">Sí</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="headache">Dolor de cabeza</label>
+          <select id="headache"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="dizziness">Mareos</label>
+          <select id="dizziness"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="loss_of_appetite">Pérdida de apetito</label>
+          <select id="loss_of_appetite"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="weakness">Debilidad</label>
+          <select id="weakness"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="myalgias">Mialgias (dolor muscular)</label>
+          <select id="myalgias"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="arthralgias">Artralgias (dolor articular)</label>
+          <select id="arthralgias"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="eye_pain">Dolor ocular</label>
+          <select id="eye_pain"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="hemorrhages">Hemorragias</label>
+          <select id="hemorrhages"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="vomiting">Vómitos</label>
+          <select id="vomiting"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="abdominal_pain">Dolor abdominal</label>
+          <select id="abdominal_pain"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="chills">Escalofríos</label>
+          <select id="chills"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="hemoptysis">Hemoptisis (tos con sangre)</label>
+          <select id="hemoptysis"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="edema">Edema</label>
+          <select id="edema"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="jaundice">Ictericia</label>
+          <select id="jaundice"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="bruises">Moretones</label>
+          <select id="bruises"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="petechiae">Petequias</label>
+          <select id="petechiae"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="rash">Erupción cutánea (rash)</label>
+          <select id="rash"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="diarrhea">Diarrea</label>
+          <select id="diarrhea"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="respiratory_difficulty">Dificultad respiratoria</label>
+          <select id="respiratory_difficulty"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+        <div class="campo">
+          <label for="itching">Picazón (prurito)</label>
+          <select id="itching"><option value="0">No</option><option value="1">Sí</option></select>
+        </div>
+
+        <!-- DATOS DE LABORATORIO -->
+        <h3 style="font-size:14px; margin-top:20px; margin-bottom:10px;">Datos de Laboratorio</h3>
+        <div class="campo">
+          <label for="hematocrit">Hematocrito (%)</label>
+          <input type="number" id="hematocrit" step="any" placeholder="ej. 42" />
+        </div>
+        <div class="campo">
+          <label for="hemoglobin">Hemoglobina (g/dL)</label>
+          <input type="number" id="hemoglobin" step="any" placeholder="ej. 13.5" />
+        </div>
+        <div class="campo">
+          <label for="red_blood_cells">Glóbulos rojos (mill/uL)</label>
+          <input type="number" id="red_blood_cells" step="any" placeholder="ej. 4.6" />
+        </div>
+        <div class="campo">
+          <label for="white_blood_cells">Glóbulos blancos (/uL)</label>
+          <input type="number" id="white_blood_cells" step="any" placeholder="ej. 7000" />
+        </div>
+        <div class="campo">
+          <label for="platelets">Plaquetas (/uL)</label>
+          <input type="number" id="platelets" step="any" placeholder="ej. 150000" />
+        </div>
+        <div class="campo">
+          <label for="neutrophils">Neutrófilos (%)</label>
+          <input type="number" id="neutrophils" step="any" placeholder="ej. 60" />
+        </div>
+        <div class="campo">
+          <label for="eosinophils">Eosinófilos (%)</label>
+          <input type="number" id="eosinophils" step="any" placeholder="ej. 2" />
+        </div>
+        <div class="campo">
+          <label for="basophils">Basófilos (%)</label>
+          <input type="number" id="basophils" step="any" placeholder="ej. 0.5" />
+        </div>
+        <div class="campo">
+          <label for="monocytes">Monocitos (%)</label>
+          <input type="number" id="monocytes" step="any" placeholder="ej. 6" />
+        </div>
+        <div class="campo">
+          <label for="lymphocytes">Linfocitos (%)</label>
+          <input type="number" id="lymphocytes" step="any" placeholder="ej. 30" />
+        </div>
+        <div class="campo">
+          <label for="ast">AST (SGOT) (U/L)</label>
+          <input type="number" id="ast" step="any" placeholder="ej. 25" />
+        </div>
+        <div class="campo">
+          <label for="alt">ALT (SGPT) (U/L)</label>
+          <input type="number" id="alt" step="any" placeholder="ej. 30" />
+        </div>
+        <div class="campo">
+          <label for="alp">ALP (U/L)</label>
+          <input type="number" id="alp" step="any" placeholder="ej. 80" />
+        </div>
+        <div class="campo">
+          <label for="total_bilirubin">Bilirrubina Total (mg/dL)</label>
+          <input type="number" id="total_bilirubin" step="any" placeholder="ej. 0.8" />
+        </div>
+        <div class="campo">
+          <label for="total_proteins">Proteínas Totales (g/dL)</label>
+          <input type="number" id="total_proteins" step="any" placeholder="ej. 7.0" />
+        </div>
+        <div class="campo">
+          <label for="creatinine">Creatinina (mg/dL)</label>
+          <input type="number" id="creatinine" step="any" placeholder="ej. 0.9" />
+        </div>
       </div>
 
       <hr style="border:none;height:1px;background:rgba(15,23,42,0.1);margin:16px 0;">
@@ -633,55 +640,60 @@
     <img src="static/bienvenida.webp?v=1" alt="Bienvenida" id="mainImage">
   </div>
 
-  <!-- Información sobre las enfermedades -->
-  <div class="panel" style="margin-top:20px;">
-    <h3>Información sobre las Enfermedades</h3>
-    <p class="desc">El dengue, la malaria y la leptospirosis son enfermedades febriles con síntomas similares, como fiebre, dolor de cabeza y malestar general, lo que dificulta su diagnóstico temprano.</p>
-    
-    <div style="margin-top:16px;">
-      <h4 style="color:var(--accent); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-        <span style="background:#fbbf24; color:#92400e; padding:4px 8px; border-radius:6px; font-size:14px;">1</span>
-        Dengue
-      </h4>
-      <ul style="margin-left:20px; color:var(--muted); font-size:13px; line-height:1.6;">
-        <li><strong>Agente causal:</strong> Virus del género Flavivirus.</li>
-        <li><strong>Transmisión:</strong> Picadura de mosquitos Aedes aegypti.</li>
-        <li><strong>Síntomas:</strong> Fiebre alta, dolor de cabeza intenso, dolor detrás de los ojos, dolor muscular y articular. También puede presentar signos de alarma como decaimiento severo, dolor abdominal persistente, vómito, sangrado de encías o moretones.</li>
-        <li><strong>Complicaciones:</strong> Puede evolucionar a formas graves con hemorragias y shock.</li>
-      </ul>
-    </div>
+  <!-- Botón para desplegar la información de enfermedades -->
+  <button id="toggleDiseaseInfoBtn" class="btn btn-primary" style="width:100%; margin-top: 20px;">Información sobre las Enfermedades</button>
 
-    <div style="margin-top:16px;">
-      <h4 style="color:var(--accent); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-        <span style="background:#10b981; color:#065f46; padding:4px 8px; border-radius:6px; font-size:14px;">2</span>
-        Malaria (Paludismo)
-      </h4>
-      <ul style="margin-left:20px; color:var(--muted); font-size:13px; line-height:1.6;">
-        <li><strong>Agente causal:</strong> Parásitos del género Plasmodium.</li>
-        <li><strong>Transmisión:</strong> Picadura de mosquitos hembra del género Anopheles.</li>
-        <li><strong>Síntomas:</strong> Fiebre, escalofríos y dolor de cabeza, que aparecen 10 a 15 días después de la picadura.</li>
-        <li><strong>Complicaciones:</strong> Algunos tipos de malaria pueden ser mortales.</li>
-      </ul>
-    </div>
+  <!-- Contenedor de la información que se puede ocultar/mostrar -->
+  <div id="diseaseInfoPanel" style="display: none;">
+    <div class="panel" style="margin-top:15px;">
+      <h3>Información sobre las Enfermedades</h3>
+      <p class="desc">El dengue, la malaria y la leptospirosis son enfermedades febriles con síntomas similares, como fiebre, dolor de cabeza y malestar general, lo que dificulta su diagnóstico temprano.</p>
+      
+      <div style="margin-top:16px;">
+        <h4 style="color:var(--accent); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+          <span style="background:#fbbf24; color:#92400e; padding:4px 8px; border-radius:6px; font-size:14px;">1</span>
+          Dengue
+        </h4>
+        <ul style="margin-left:20px; color:var(--muted); font-size:13px; line-height:1.6;">
+          <li><strong>Agente causal:</strong> Virus del género Flavivirus.</li>
+          <li><strong>Transmisión:</strong> Picadura de mosquitos Aedes aegypti.</li>
+          <li><strong>Síntomas:</strong> Fiebre alta, dolor de cabeza intenso, dolor detrás de los ojos, dolor muscular y articular. También puede presentar signos de alarma como decaimiento severo, dolor abdominal persistente, vómito, sangrado de encías o moretones.</li>
+          <li><strong>Complicaciones:</strong> Puede evolucionar a formas graves con hemorragias y shock.</li>
+        </ul>
+      </div>
 
-    <div style="margin-top:16px;">
-      <h4 style="color:var(--accent); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-        <span style="background:#3b82f6; color:#1e40af; padding:4px 8px; border-radius:6px; font-size:14px;">3</span>
-        Leptospirosis
-      </h4>
-      <ul style="margin-left:20px; color:var(--muted); font-size:13px; line-height:1.6;">
-        <li><strong>Agente causal:</strong> Bacteria del género Leptospira.</li>
-        <li><strong>Transmisión:</strong> Contacto directo con orina de animales infectados o con tierra o agua contaminada con esta orina.</li>
-        <li><strong>Síntomas:</strong> Puede variar desde un cuadro leve hasta una enfermedad grave que afecta múltiples órganos.</li>
-        <li><strong>Complicaciones:</strong> Puede causar disfunción de órganos como riñones, hígado, pulmones y cerebro. A menudo se asocia con brotes después de lluvias fuertes, ya que las bacterias sobreviven mejor en ambientes húmedos.</li>
-      </ul>
-    </div>
+      <div style="margin-top:16px;">
+        <h4 style="color:var(--accent); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+          <span style="background:#10b981; color:#065f46; padding:4px 8px; border-radius:6px; font-size:14px;">2</span>
+          Malaria (Paludismo)
+        </h4>
+        <ul style="margin-left:20px; color:var(--muted); font-size:13px; line-height:1.6;">
+          <li><strong>Agente causal:</strong> Parásitos del género Plasmodium.</li>
+          <li><strong>Transmisión:</strong> Picadura de mosquitos hembra del género Anopheles.</li>
+          <li><strong>Síntomas:</strong> Fiebre, escalofríos y dolor de cabeza, que aparecen 10 a 15 días después de la picadura.</li>
+          <li><strong>Complicaciones:</strong> Algunos tipos de malaria pueden ser mortales.</li>
+        </ul>
+      </div>
 
-    <div style="margin-top:20px; padding:14px; background:rgba(37,99,235,0.05); border-radius:10px; border-left:4px solid var(--accent);">
-      <h4 style="color:var(--accent); margin-bottom:8px;">Puntos clave para diagnóstico y tratamiento</h4>
-      <p style="font-size:13px; color:var(--muted); line-height:1.6;">
-        Dada la superposición de síntomas, especialmente en las primeras etapas, es fundamental un diagnóstico preciso basado en pruebas de laboratorio. El diagnóstico incorrecto puede llevar a retrasos en el tratamiento adecuado, lo que aumenta el riesgo de complicaciones graves e incluso de muerte. La coinfección con estas enfermedades es posible y puede complicar el cuadro clínico y el manejo.
-      </p>
+      <div style="margin-top:16px;">
+        <h4 style="color:var(--accent); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+          <span style="background:#3b82f6; color:#1e40af; padding:4px 8px; border-radius:6px; font-size:14px;">3</span>
+          Leptospirosis
+        </h4>
+        <ul style="margin-left:20px; color:var(--muted); font-size:13px; line-height:1.6;">
+          <li><strong>Agente causal:</strong> Bacteria del género Leptospira.</li>
+          <li><strong>Transmisión:</strong> Contacto directo con orina de animales infectados o con tierra o agua contaminada con esta orina.</li>
+          <li><strong>Síntomas:</strong> Puede variar desde un cuadro leve hasta una enfermedad grave que afecta múltiples órganos.</li>
+          <li><strong>Complicaciones:</strong> Puede causar disfunción de órganos como riñones, hígado, pulmones y cerebro. A menudo se asocia con brotes después de lluvias fuertes, ya que las bacterias sobreviven mejor en ambientes húmedos.</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:20px; padding:14px; background:rgba(37,99,235,0.05); border-radius:10px; border-left:4px solid var(--accent);">
+        <h4 style="color:var(--accent); margin-bottom:8px;">Puntos clave para diagnóstico y tratamiento</h4>
+        <p style="font-size:13px; color:var(--muted); line-height:1.6;">
+          Dada la superposición de síntomas, especialmente en las primeras etapas, es fundamental un diagnóstico preciso basado en pruebas de laboratorio. El diagnóstico incorrecto puede llevar a retrasos en el tratamiento adecuado, lo que aumenta el riesgo de complicaciones graves e incluso de muerte. La coinfección con estas enfermedades es posible y puede complicar el cuadro clínico y el manejo.
+        </p>
+      </div>
     </div>
   </div>
 </div>
@@ -733,6 +745,37 @@
     const outputInitial = document.getElementById('outputInitial');
     const btnProcessLocal = document.getElementById('btnProcessLocal');
     const clearBtn = document.getElementById('clear');
+    const togglePatientDataBtn = document.getElementById('togglePatientDataBtn');
+    const patientDataForm = document.getElementById('patientDataForm');
+    const toggleDiseaseInfoBtn = document.getElementById('toggleDiseaseInfoBtn');
+    const diseaseInfoPanel = document.getElementById('diseaseInfoPanel');
+
+    // Lógica para desplegar/ocultar el formulario de datos del paciente
+    togglePatientDataBtn.addEventListener('click', () => {
+      if (patientDataForm.style.display === 'none') {
+        patientDataForm.style.display = 'block';
+        togglePatientDataBtn.textContent = 'Ocultar Datos del Paciente';
+      } else {
+        patientDataForm.style.display = 'none';
+        togglePatientDataBtn.textContent = 'Registrar Datos del Paciente';
+      }
+    });
+
+    // Lógica para desplegar/ocultar la información de enfermedades
+    toggleDiseaseInfoBtn.addEventListener('click', () => {
+      if (diseaseInfoPanel.style.display === 'none') {
+        diseaseInfoPanel.style.display = 'block';
+        toggleDiseaseInfoBtn.textContent = 'Ocultar Información';
+      } else {
+        diseaseInfoPanel.style.display = 'none';
+        toggleDiseaseInfoBtn.textContent = 'Información sobre las Enfermedades';
+      }
+    });
+
+    // Función para hacer scroll al panel de resultados
+    function scrollToResults() {
+      resultadoBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
     function getSymptoms() {
         const allInputs = document.querySelectorAll('.campo select, .campo input');
@@ -806,6 +849,7 @@
             <p style="font-size:12px; color:var(--muted); margin-top:10px;">Por favor, revisa los valores ingresados.</p>
           `;
         }
+        scrollToResults(); // Scroll automático al resultado
       } catch (err) {
         resultadoBox.innerHTML = `<p style="color:var(--danger)"><b>Error:</b> No se pudo contactar el servidor. ${err.message}</p>`;
       }
@@ -835,11 +879,11 @@
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:20px;">
                 <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                   <h4 style="margin-bottom:10px; color:var(--accent);">Matriz de Confusión</h4>
-                  <img src="data:image/png;base64,${modelData.grafica_confusion}" style="width:100%; height:auto; border-radius:8px;" alt="Matriz de Confusión" class="grafica-clickable" onclick="abrirModal(this.src)">
+                  <img src="data:image/png;base64,${modelData.grafica_confusion}" style="width:100%; height:auto; border-radius:8px;" alt="Matriz de Confusión" class="grafica-clickable" onclick="abrirModal(this)">
                 </div>
                 <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                   <h4 style="margin-bottom:10px; color:var(--accent);">Distribución</h4>
-                  <img src="data:image/png;base64,${modelData.grafica_dispersion}" style="width:100%; height:auto; border-radius:8px;" alt="Gráfica de Dispersión" class="grafica-clickable" onclick="abrirModal(this.src)">
+                  <img src="data:image/png;base64,${modelData.grafica_dispersion}" style="width:100%; height:auto; border-radius:8px;" alt="Gráfica de Dispersión" class="grafica-clickable" onclick="abrirModal(this)">
                 </div>
               </div>
             </div>
@@ -852,6 +896,7 @@
 
         resultadoBox.innerHTML = '<h3 style="margin-bottom:10px;color:var(--accent);">Resultados de Evaluación del Modelo</h3>' + (finalHTML || '<p>No se recibieron datos de evaluación.</p>');
         
+        scrollToResults(); // Scroll automático al resultado
       } catch (error) {
         resultadoBox.innerHTML = `<p style="color:var(--danger)">Error al evaluar el modelo: ${error.message}</p>`;
       }
@@ -915,19 +960,20 @@
           graficasHTML += `
             <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
               <h4 style="margin-bottom:10px; color:var(--accent);">Matriz de Confusión</h4>
-              <img src="data:image/png;base64,${data.grafica_confusion}" style="width:100%; height:auto; border-radius:8px;" alt="Matriz de Confusión" class="grafica-clickable" onclick="abrirModal(this.src)">
+              <img src="data:image/png;base64,${data.grafica_confusion}" style="width:100%; height:auto; border-radius:8px;" alt="Matriz de Confusión" class="grafica-clickable" onclick="abrirModal(this)">
             </div>`;
         }
         if (data.grafica_dispersion) {
           graficasHTML += `
             <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
               <h4 style="margin-bottom:10px; color:var(--accent);">Distribución de Predicciones</h4>
-              <img src="data:image/png;base64,${data.grafica_dispersion}" style="width:100%; height:auto; border-radius:8px;" alt="Gráfica de Dispersión" class="grafica-clickable" onclick="abrirModal(this.src)">
+              <img src="data:image/png;base64,${data.grafica_dispersion}" style="width:100%; height:auto; border-radius:8px;" alt="Gráfica de Dispersión" class="grafica-clickable" onclick="abrirModal(this)">
             </div>`;
         }
         graficasHTML += '</div>';
         
         resultadoBox.innerHTML = '<h3 style="margin-bottom:10px;color:var(--accent);">Resultados del Análisis por Lotes</h3>' + estadisticasHTML + distribucionHTML + graficasHTML;
+        scrollToResults(); // Scroll automático al resultado
 
       } catch (error) {
         resultadoBox.innerHTML = `<p style="color:var(--danger)">Error al procesar archivo: ${error.message}</p>`;
@@ -941,8 +987,16 @@
     // ==========================================
     // FUNCIONALIDAD DEL MODAL PARA AMPLIAR GRÁFICAS
     // ==========================================
-    function abrirModal(src) {
-      modalImg.src = src;
+    function abrirModal(imgElement) {
+      // Revisa el 'alt' de la imagen para ver si es una matriz de confusión
+      const isConfusionMatrix = imgElement.alt.includes('Matriz de Confusión');
+
+      // Aplica el tamaño condicional
+      modalImg.style.maxWidth = isConfusionMatrix ? '600px' : '1200px';
+      // Centra la imagen si es más pequeña
+      modalImg.style.display = 'block';
+
+      modalImg.src = imgElement.src;
       modal.style.display = 'block';
     }
 
