@@ -105,5 +105,8 @@ def predecir_lote_endpoint():
 # EJECUCIÓN LOCAL
 # ==============================
 if __name__ == '__main__':
-    cargar_modelo() # Carga el modelo al iniciar la app
-    app.run(debug=True)
+    cargar_modelo()  # Carga el modelo al iniciar la app
+    # Configuración para compatibilidad con Render y otros servicios de hosting
+    port = int(os.environ.get("PORT", 5000))
+    # debug=True es útil para desarrollo, pero en producción se recomienda False.
+    app.run(host="0.0.0.0", port=port, debug=True)
