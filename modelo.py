@@ -17,7 +17,8 @@ import io
 # ===============================
 # CONFIGURACIÓN DE RUTA
 # ===============================
-DATASET_PATH = r"C:\Proyecto final\Dataset para PROYECTO FINAL\DEMALE-HSJM_2025_data.xlsx"
+# Ruta relativa para compatibilidad con Render y ejecución local.
+DATASET_PATH = "data/DEMALE-HSJM_2025_data.xlsx"
 MODEL_PATH = "modelo_entrenado.pkl"
 
 # Variables globales para el modelo
