@@ -603,7 +603,7 @@
 
       <div class="actions">
         <button id="predecirServidor" class="btn btn-primary" title="Enviar al servidor para predicción con IA">Predecir con Modelo</button>
-        <button id="clear" class="btn btn-ghost">Limpiar</button>
+        <button id="clear" class="btn btn-ghost" style="flex-grow: 1;">Limpiar</button>
       </div>
       
       <hr style="border:none;height:1px;background:rgba(15,23,42,0.1);margin:16px 0;">
@@ -704,7 +704,7 @@
     <div class="resultados">
       <div class="panel resultado-box" id="resultadoBox">
         <h3 style="margin-bottom:10px;color:var(--accent);">Resultados del Análisis</h3>
-        <div id="outputInitial">
+        <div id="outputInitial" style="line-height: 1.6;">
           <p style="color:var(--muted)">No hay resultados aún. Completa los síntomas y presiona <b>Predecir (local)</b> o carga un dataset.</p>
         </div>
         <!-- Resultado din��mico se inyecta aquí -->
@@ -749,6 +749,15 @@
     const patientDataForm = document.getElementById('patientDataForm');
     const toggleDiseaseInfoBtn = document.getElementById('toggleDiseaseInfoBtn');
     const diseaseInfoPanel = document.getElementById('diseaseInfoPanel');
+
+    // Cargar parámetros del modelo desde el placeholder de Flask/Jinja2
+    let modelParams = {};
+    try {
+      const modelParamsRaw = `{{ model_params | safe }}`;
+      modelParams = JSON.parse(modelParamsRaw);
+    } catch (e) {
+      console.error("No se pudieron cargar los parámetros del modelo. La predicción local no funcionará.", e);
+    }
 
     // Lógica para desplegar/ocultar el formulario de datos del paciente
     togglePatientDataBtn.addEventListener('click', () => {
@@ -821,20 +830,34 @@
       if (outputInitial) outputInitial.style.display = 'block';
     });
 
+    function hayDatosClinicos(sintomas) {
+      // Lista de campos que NO son demográficos (son clínicos o de laboratorio)
+      const camposClinicos = [
+        'hospitalization_days', 'body_temperature', 'fever', 'headache', 'dizziness', 
+        'loss_of_appetite', 'weakness', 'myalgias', 'arthralgias', 'eye_pain', 
+        'hemorrhages', 'vomiting', 'abdominal_pain', 'chills', 'hemoptysis', 
+        'edema', 'jaundice', 'bruises', 'petechiae', 'rash', 'diarrhea', 
+        'respiratory_difficulty', 'itching', 'hematocrit', 'hemoglobin', 
+        'red_blood_cells', 'white_blood_cells', 'platelets', 'neutrophils', 
+        'eosinophils', 'basophils', 'monocytes', 'lymphocytes', 'ast', 'alt', 
+        'alp', 'total_bilirubin', 'total_proteins', 'creatinine'
+      ];
+      // Revisa si al menos uno de los campos clínicos tiene un valor
+      return camposClinicos.some(campo => campo in sintomas && sintomas[campo] !== '');
+    }
+
     // Envío al servidor (si quieres mantener el backend)
     btnPredecirSrv.addEventListener('click', async () => {
       const formData = new FormData();
       const sym = getSymptoms();
 
-      // Validación: verificar si se ingresó algún síntoma.
-      // Object.keys(sym).length > 7 porque getSymptoms siempre devuelve 7 campos de ocupación.
-      if (Object.keys(sym).length <= 7) {
+      if (!hayDatosClinicos(sym)) {
         resultadoBox.innerHTML = `
           <h3 style="margin-bottom:10px;color:var(--danger);">Datos insuficientes</h3>
-          <p style="color:var(--muted); font-size:14px;">No se ha registrado ningún síntoma o dato clínico. Por favor, completa el formulario.</p>
+          <p style="color:var(--muted); font-size:14px;">Por favor, ingrese al menos un <b>síntoma clínico</b> o <b>dato de laboratorio</b> para una evaluación válida.</p>
         `;
         scrollToResults();
-        return; // Detener la ejecución si no hay datos
+        return;
       }
 
       for (const key in sym) {
