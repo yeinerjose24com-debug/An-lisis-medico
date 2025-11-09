@@ -825,6 +825,18 @@
     btnPredecirSrv.addEventListener('click', async () => {
       const formData = new FormData();
       const sym = getSymptoms();
+
+      // Validación: verificar si se ingresó algún síntoma.
+      // Object.keys(sym).length > 7 porque getSymptoms siempre devuelve 7 campos de ocupación.
+      if (Object.keys(sym).length <= 7) {
+        resultadoBox.innerHTML = `
+          <h3 style="margin-bottom:10px;color:var(--danger);">Datos insuficientes</h3>
+          <p style="color:var(--muted); font-size:14px;">No se ha registrado ningún síntoma o dato clínico. Por favor, completa el formulario.</p>
+        `;
+        scrollToResults();
+        return; // Detener la ejecución si no hay datos
+      }
+
       for (const key in sym) {
           formData.append(key, sym[key]);
       }
