@@ -317,35 +317,29 @@ def evaluar_modelo():
     
     # Generar gráficos para Regresión Logística
     fig_confusion_logistica = generar_matriz_confusion(y_true, y_pred_logistica, "Regresión Logística")
-    fig_dispersion_logistica = generar_grafica_dispersion(X_scaled, y_true, y_pred_logistica, "Regresión Logística")
     
     # Convertir gráficos a base64
     confusion_b64_logistica = figura_a_base64(fig_confusion_logistica)
-    dispersion_b64_logistica = figura_a_base64(fig_dispersion_logistica)
 
     # Calcular métricas para Red Neuronal
     accuracy_mlp = accuracy_score(y_true, y_pred_mlp)
     
     # Generar gráficos para Red Neuronal
     fig_confusion_mlp = generar_matriz_confusion(y_true, y_pred_mlp, "Red Neuronal (MLP)")
-    fig_dispersion_mlp = generar_grafica_dispersion(X_scaled, y_true, y_pred_mlp, "Red Neuronal (MLP)")
     
     # Convertir gráficos a base64
     confusion_b64_mlp = figura_a_base64(fig_confusion_mlp)
-    dispersion_b64_mlp = figura_a_base64(fig_dispersion_mlp)
     
     plt.close('all')  # Cerrar todas las figuras
     
     return {
         'logistica': {
-            'precision': accuracy_logistica,
-            'grafica_confusion': confusion_b64_logistica,
-            'grafica_dispersion': dispersion_b64_logistica
+            'exactitud': accuracy_logistica,
+            'grafica_confusion': confusion_b64_logistica
         },
         'red_neuronal': {
-            'precision': accuracy_mlp,
-            'grafica_confusion': confusion_b64_mlp,
-            'grafica_dispersion': dispersion_b64_mlp
+            'exactitud': accuracy_mlp,
+            'grafica_confusion': confusion_b64_mlp
         }
     }
 
@@ -490,7 +484,6 @@ def predecir_lote(archivo_excel):
     
     # Generar gráficas
     fig_confusion = None
-    fig_dispersion = generar_grafica_dispersion(X_scaled, None, y_pred, "Regresión Logística")
     
     # Si hay columna 'disease' o similar, calcular matriz de confusión
     target_col = None
@@ -502,27 +495,45 @@ def predecir_lote(archivo_excel):
     if target_col:
         # Asegurarse de que la columna de verdad fundamental (ground truth) exista y no esté vacía
         if target_col in data and not data[target_col].isnull().all():
-            # Mapear los valores reales y eliminar filas donde el mapeo falló (NaN)
+            # --- LÓGICA DE BALANCEO PARA MATRIZ DE CONFUSIÓN ---
             y_true_mapped = data[target_col].map(lambda v: label_map.get(v, v))
             
-            # Crear un DataFrame temporal para alinear predicciones y valores reales
-            # Esto es crucial si hay valores NaN en y_true_mapped que deben ser ignorados
-            temp_df = pd.DataFrame({'true': y_true_mapped, 'pred': y_pred}).dropna()
+            # Combinar verdad y predicción, y eliminar filas sin verdad mapeada
+            eval_df = pd.DataFrame({'__target__': y_true_mapped, '__pred__': y_pred}).dropna(subset=['__target__'])
             
-            y_true = temp_df['true']
-            y_pred_aligned = temp_df['pred']
+            # Balancear el conjunto de datos de evaluación a 51 muestras por clase
+            N_SAMPLES_PER_CLASS = 51
+            balanced_dfs = []
+            for disease_name in label_map.values():
+                class_df = eval_df[eval_df['__target__'] == disease_name]
+                current_samples = len(class_df)
+                
+                if current_samples == 0: continue # Saltar si no hay muestras para una clase
+
+                if current_samples > N_SAMPLES_PER_CLASS:
+                    res_df = class_df.sample(n=N_SAMPLES_PER_CLASS, random_state=42)
+                else: # Incluye el caso de ser menor o igual, usando sobremuestreo si es menor
+                    res_df = class_df.sample(n=N_SAMPLES_PER_CLASS, replace=True, random_state=42)
+                balanced_dfs.append(res_df)
             
-            fig_confusion = generar_matriz_confusion(y_true, y_pred, "Regresión Logística")
+            if not balanced_dfs: # Si no se pudo balancear nada
+                confusion_b64 = None
+                estadisticas['exactitud'] = None
+                return {'predicciones': data.to_dict('records'), 'estadisticas': estadisticas, 'grafica_confusion': None}
+
+            balanced_eval_df = pd.concat(balanced_dfs)
+            y_true_balanced = balanced_eval_df['__target__']
+            y_pred_balanced = balanced_eval_df['__pred__']
+            
+            fig_confusion = generar_matriz_confusion(y_true_balanced, y_pred_balanced, "Regresión Logística (Balanceado)")
             confusion_b64 = figura_a_base64(fig_confusion)
-            estadisticas['precision'] = accuracy_score(y_true, y_pred_aligned)
+            estadisticas['exactitud'] = accuracy_score(y_true_balanced, y_pred_balanced)
         else:
             confusion_b64 = None
-            estadisticas['precision'] = None
+            estadisticas['exactitud'] = None
     else:
         confusion_b64 = None
-        estadisticas['precision'] = None
-    
-    dispersion_b64 = figura_a_base64(fig_dispersion)
+        estadisticas['exactitud'] = None
     
     plt.close('all')
     
@@ -533,7 +544,6 @@ def predecir_lote(archivo_excel):
         'predicciones': resultados_df,
         'estadisticas': estadisticas,
         'grafica_confusion': confusion_b64,
-        'grafica_dispersion': dispersion_b64
     }
 
 # ===============================

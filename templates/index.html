@@ -363,10 +363,6 @@
         </div>
       </div>
 
-      <div class="header-actions">
-        <button title="Documentación">Docs</button>
-        <button title="Configuración">Config</button>
-      </div>
     </div>
 
     <!-- LEFT: formulario síntomas -->
@@ -908,17 +904,13 @@
             <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
               <h3 style="color: var(--accent); margin-bottom: 16px;">${modelName}</h3>
               <div style="margin-bottom:20px; padding:16px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); border-radius:12px; color:white; text-align:center;">
-                <div style="font-size:20px; font-weight:700; margin-bottom:8px;">Precisión</div>
-                <div style="font-size:40px; font-weight:900;">${(modelData.precision * 100).toFixed(2)}%</div>
+                <div style="font-size:20px; font-weight:700; margin-bottom:8px;">Exactitud</div>
+                <div style="font-size:40px; font-weight:900;">${(modelData.exactitud * 100).toFixed(2)}%</div>
               </div>
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:20px;">
+              <div style="display:grid; grid-template-columns: 1fr; gap:16px; margin-top:20px;">
                 <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                   <h4 style="margin-bottom:10px; color:var(--accent);">Matriz de Confusión</h4>
                   <img src="data:image/png;base64,${modelData.grafica_confusion}" style="width:100%; height:auto; border-radius:8px;" alt="Matriz de Confusión" class="grafica-clickable" onclick="abrirModal(this)">
-                </div>
-                <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                  <h4 style="margin-bottom:10px; color:var(--accent);">Distribución</h4>
-                  <img src="data:image/png;base64,${modelData.grafica_dispersion}" style="width:100%; height:auto; border-radius:8px;" alt="Gráfica de Dispersión" class="grafica-clickable" onclick="abrirModal(this)">
                 </div>
               </div>
             </div>
@@ -975,11 +967,11 @@
             <div style="font-size:36px; font-weight:900;">${data.estadisticas.total_casos}</div>
           </div>`;
 
-        if (data.estadisticas.precision) {
+        if (data.estadisticas.exactitud) {
           estadisticasHTML += `
             <div style="margin-bottom:20px; padding:16px; background:linear-gradient(135deg, #10b981, #059669); border-radius:12px; color:white; text-align:center;">
-              <div style="font-size:20px; font-weight:800; margin-bottom:8px;">Precisión del Modelo</div>
-              <div style="font-size:36px; font-weight:900;">${(data.estadisticas.precision * 100).toFixed(2)}%</div>
+              <div style="font-size:20px; font-weight:800; margin-bottom:8px;">Exactitud del Modelo</div>
+              <div style="font-size:36px; font-weight:900;">${(data.estadisticas.exactitud * 100).toFixed(2)}%</div>
             </div>`;
         }
 
@@ -990,19 +982,12 @@
         }
         distribucionHTML += '</div>';
         
-        let graficasHTML = '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:20px;">';
+        let graficasHTML = '<div style="display:grid; grid-template-columns: 1fr; gap:16px; margin-top:20px;">';
         if (data.grafica_confusion) {
           graficasHTML += `
             <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
               <h4 style="margin-bottom:10px; color:var(--accent);">Matriz de Confusión</h4>
               <img src="data:image/png;base64,${data.grafica_confusion}" style="width:100%; height:auto; border-radius:8px;" alt="Matriz de Confusión" class="grafica-clickable" onclick="abrirModal(this)">
-            </div>`;
-        }
-        if (data.grafica_dispersion) {
-          graficasHTML += `
-            <div style="background:white; padding:12px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-              <h4 style="margin-bottom:10px; color:var(--accent);">Distribución de Predicciones</h4>
-              <img src="data:image/png;base64,${data.grafica_dispersion}" style="width:100%; height:auto; border-radius:8px;" alt="Gráfica de Dispersión" class="grafica-clickable" onclick="abrirModal(this)">
             </div>`;
         }
         graficasHTML += '</div>';
