@@ -7,9 +7,11 @@ import os
 import socket
 
 app = Flask(__name__)
-# Secret key required for session support; in production use a secure value
-app.secret_key = os.environ.get('SECRET_KEY', 'dev_secret_key')
+
+# Configuración de seguridad: CSRF y Secret Key
+app.config['SECRET_KEY'] = 'clave_secreta_segura'
 csrf = CSRFProtect(app)
+
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
 
